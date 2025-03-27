@@ -1,0 +1,46 @@
+.sidebar {
+    width: 0;
+    transition: width 0.3s;
+    overflow: hidden;
+    position: fixed;
+    height: 100vh;
+    background: rgba(30, 58, 138, 0.9);
+    color: white;
+}
+
+.sidebar.expanded {
+    width: 200px;
+    padding: 1rem;
+}
+
+.toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.6); /* Light transparent background */
+    color: #333; /* Dark gray for better visibility */
+    border: 2px solid rgba(0, 0, 0, 0.3); /* Subtle border */
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 16px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s, background-color 0.3s, border 0.3s;
+}
+
+.toggle-btn::before {
+    content: '\276F'; /* ❯ (Thin Right Arrow) */
+}
+
+.toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+
+

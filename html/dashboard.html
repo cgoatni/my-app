@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="bg-gray-100 flex h-screen">
+    <!-- Toggle Button -->
+    <button onclick="toggleSidebar()" class="toggle-btn"></button>
+    
+    <!-- Sidebar -->
+    <div class="sidebar flex flex-col h-full" id="sidebar">
+        <h1 class="text-2xl font-semibold text-center mb-4" id="fullname">Loading...!</h1>
+        <a href="#" class="block py-2 px-4 rounded-lg hover:bg-blue-700">Home</a>
+        <a href="#" class="block py-2 px-4 rounded-lg hover:bg-blue-700">Profile</a>
+        <a href="#" class="block py-2 px-4 rounded-lg hover:bg-blue-700">Settings</a>
+        <button id="logout-btn" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 w-full mt-auto">Logout</button>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 p-8 ml-10">
+        <div class="bg-blue-600 text-white text-center p-4 rounded-lg shadow-md text-xl font-semibold">
+            Welcome to the Dashboard
+        </div>
+        
+        <!-- Status Cards Section -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Status 1 -->
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                <h2 class="text-xl font-semibold text-gray-700">Total Users</h2>
+                <p class="text-2xl font-bold text-blue-600">1,245</p>
+            </div>
+        
+            <!-- Status 2 -->
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                <h2 class="text-xl font-semibold text-gray-700">Active Sessions</h2>
+                <p class="text-2xl font-bold text-green-600">342</p>
+            </div>
+        
+            <!-- Status 3 -->
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                <h2 class="text-xl font-semibold text-gray-700">Pending Requests</h2>
+                <p class="text-2xl font-bold text-red-600">57</p>
+            </div>
+        </div>        
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>
