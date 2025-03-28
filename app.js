@@ -18,8 +18,12 @@ app.use(bodyParser.json());
 app.use(session({
     secret: 'sampleOnly',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Set to true if using HTTPS
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        collectionName: 'sessions'
+    }),
+    cookie: { secure: false } 
 }));
 
 let db;
@@ -85,6 +89,26 @@ app.post('/register', async (req, res) => {
     } catch (error) {
         console.error("Registration Error:", error);
         return res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+app.get('/count', async (req, res) => {  // Add async here
+    try {
+        const userCount = await db.collection('users').countDocuments(); 
+        res.json({ userCount }); 
+    } catch (error) {
+        console.error("❌ Error fetching user count:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+app.get('/active', async (req, res) => {
+    try {
+        const activeSessions = await db.collection('sessions').countDocuments();
+        res.json({ activeUsers: activeSessions });
+    } catch (error) {
+        console.error("❌ Error fetching active users:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

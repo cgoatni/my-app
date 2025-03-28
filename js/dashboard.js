@@ -26,6 +26,32 @@ if (logoutBtn) {
     console.warn("Logout button not found");
 }
 
+async function fetchUserCount() {
+    try {
+        const response = await fetch('/count');
+        const data = await response.json();
+        document.getElementById('userCount').textContent = data.userCount.toLocaleString(); // Format number with commas
+    } catch (error) {
+        console.error("Error fetching user count:", error);
+        document.getElementById('userCount').textContent = "Error";
+    }
+}
+
+fetchUserCount();
+
+async function fetchActiveUsers() {
+try {
+    const response = await fetch('/active');
+    const data = await response.json();
+    document.getElementById('activeUsers').innerText = data.activeUsers;
+} catch (error) {
+    console.error("Error fetching active users:", error);
+}
+}
+
+fetchActiveUsers();
+setInterval(fetchActiveUsers, 5000);
+
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('expanded');
