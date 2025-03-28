@@ -39,18 +39,20 @@ async function fetchUserCount() {
 
 fetchUserCount();
 
-async function fetchActiveUsers() {
-try {
-    const response = await fetch('/active');
-    const data = await response.json();
-    document.getElementById('activeUsers').innerText = data.activeUsers;
-} catch (error) {
-    console.error("Error fetching active users:", error);
-}
-}
+const socket = new WebSocket(`ws://${window.location.host}`);
 
-fetchActiveUsers();
-setInterval(fetchActiveUsers, 5000);
+    async function fetchPageActiveUsers() {
+        try {
+            const response = await fetch('/activeUsers');
+            const data = await response.json();
+            document.getElementById('activeUsers').innerText = data.activeUsers;
+        } catch (error) {
+            console.error("Error fetching active users:", error);
+        }
+    }
+
+    fetchPageActiveUsers();
+    setInterval(fetchPageActiveUsers, 5000);
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');

@@ -6,9 +6,13 @@ const MongoStore = require('connect-mongo');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const session = require('express-session');
+const http = require("http");
+const WebSocket = require('ws');
 const { sendWelcomeEmail } = require('./js/emailer');
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server
+const wss = new WebSocket.Server({ server });
 const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "html")));
@@ -102,14 +106,20 @@ app.get('/count', async (req, res) => {  // Add async here
     }
 });
 
-app.get('/active', async (req, res) => {
-    try {
-        const activeSessions = await db.collection('sessions').countDocuments();
-        res.json({ activeUsers: activeSessions });
-    } catch (error) {
-        console.error("❌ Error fetching active users:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+let activeUsers = new Set();
+
+wss.on("connection", (ws, req) => {
+    if (req.session?.user) {
+        activeUsers.add(req.session.user.email);
+        
+        ws.on("close", () => {
+            activeUsers.delete(req.session.user.email);
+        });
     }
+});
+
+app.get("/activeUsers", (req, res) => {
+    res.json({ activeUsers: activeUsers.size });
 });
 
 app.post('/login', async (req, res) => {
