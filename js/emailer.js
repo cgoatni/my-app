@@ -11,20 +11,25 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendWelcomeEmail(toEmail, dashboardLink = "http://localhost:3000/login") {
+async function sendWelcomeEmail(toEmail, dashboardLink = process.env.DASHBOARD_URL) {
     try {
+        // If DASHBOARD_URL is not set, use the default Render URL
+        if (!dashboardLink) {
+            dashboardLink = "https://my-app-3huv.onrender.com/login";
+        }
+
         let info = await transporter.sendMail({
             from: `Sample Only`,
             to: toEmail,
             subject: "Welcome!",
             text: `Thank you for signing up! Access your dashboard: ${dashboardLink}`,
             html: `<b>Thank you for signing up!</b><br>
-                   <p>Click <a href="${dashboardLink}" target="_blank">here</a> to go Login page.</p>`
+                   <p>Click <a href="${dashboardLink}" target="_blank">here</a> to go to the Login page.</p>`
         });
 
-        console.log(`Email sent to ${toEmail} (ID: ${info.messageId})`);
+        console.log(`✅ Email sent to ${toEmail} (ID: ${info.messageId})`);
     } catch (error) {
-        console.error("Email sending failed:", error.message);
+        console.error("❌ Email sending failed:", error.message);
     }
 }
 
