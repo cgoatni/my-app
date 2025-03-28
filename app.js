@@ -8,7 +8,7 @@ const session = require('express-session');
 const { sendWelcomeEmail } = require('./js/emailer');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "html")));
 app.use(bodyParser.urlencoded({ extended: true }));
