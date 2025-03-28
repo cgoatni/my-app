@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
+const MongoStore = require('connect-mongo');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const session = require('express-session');
