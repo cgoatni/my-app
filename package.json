@@ -4,7 +4,8 @@
   "description": "Sample app to submit email",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "vercel-build": "npm install"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
