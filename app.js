@@ -21,21 +21,27 @@ app.use(session({
     cookie: { secure: false } // Set to true if using HTTPS
 }));
 
+let db;
 
 async function connectDB() {
     try {
         const client = new MongoClient(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         await client.connect();
         console.log("✅ Connected to MongoDB");
-        return client.db('SampleDB');
+        db = client.db('SampleDB');
     } catch (error) {
         console.error("❌ MongoDB connection failed:", error);
         process.exit(1);
     }
 }
 
-let db;
-connectDB().then(database => db = database);
+app.use((req, res, next) => {
+    if (!db) {
+        return res.status(503).json({ error: "Database connection is not ready" });
+    }
+    req.db = db;
+    next();
+});
 
 const servePage = (route, page) => app.get(route, (req, res) => res.sendFile(path.join(__dirname, 'html', page)));
 
@@ -142,4 +148,6 @@ serveFile('/js/login.js', 'js', 'login.js');
 serveFile('/js/dashboard.js', 'js', 'dashboard.js');
 serveFile('/css/dashboard.css', 'css', 'dashboard.css');
 
-app.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}/`));
+connectDB().then(() => {
+    app.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}/`));
+});
