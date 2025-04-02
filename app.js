@@ -148,6 +148,37 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Validate old password before updating password
+app.post('/api/validate-password', async (req, res) => {
+    try {
+        const { oldPassword } = req.body;
+
+        // Ensure the user is logged in
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'User is not logged in' });
+        }
+
+        // Fetch the user's current password from the database
+        const user = await db.collection('users').findOne({ email: req.session.user.email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Compare the entered old password with the stored password
+        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({ error: 'Old password is incorrect' });
+        }
+
+        res.status(200).json({ success: 'Old password is valid' });
+    } catch (error) {
+        console.error("❌ Error validating old password:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 // Get Current User
 app.get('/api/user', (req, res) => {
     if (!req.session.user) return res.redirect('/login');

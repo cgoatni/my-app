@@ -26,29 +26,76 @@
     </header>
 
     <!-- Settings Form -->
-    <main id="settings-form" class="flex-1 p-8 text-center">
-        <div class="container mx-auto max-w-lg bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Account Settings</h2>
+    <main id="settings-form" class="flex-1 flex justify-center items-center p-8">
+        <div class="container mx-auto max-w-4xl w-full bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Account Settings</h2>
 
-            <form class="space-y-4">
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Username -->
                 <div class="text-left">
                     <label for="settings-username" class="block text-gray-700">Username:</label>
                     <input type="text" id="settings-username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your username">
                 </div>
 
+                <!-- Email -->
                 <div class="text-left">
                     <label for="settings-email" class="block text-gray-700">Email:</label>
                     <input type="email" id="settings-email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
                 </div>
 
+                <!-- Contact Number -->
                 <div class="text-left">
                     <label for="settings-contact" class="block text-gray-700">Contact:</label>
                     <input type="text" id="settings-contact" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your contact number">
                 </div>
 
-                <!-- Add other settings form fields here -->
+                <!-- Address -->
+                <div class="text-left col-span-2">
+                    <label for="settings-address" class="block text-gray-700">Address:</label>
+                    <textarea id="settings-address" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your address"></textarea>
+                </div>
 
-                <div class="flex justify-center">
+                <!-- Gender -->
+                <div class="text-left">
+                    <label for="settings-gender" class="block text-gray-700">Gender:</label>
+                    <select id="settings-gender" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="text-left">
+                    <label for="settings-dob" class="block text-gray-700">Date of Birth:</label>
+                    <input type="date" id="settings-dob" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- Old Password -->
+                <div class="text-left">
+                    <label for="old-password" class="block text-gray-700">Old Password:</label>
+                    <input type="password" id="old-password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your old password">
+                </div>
+
+                <!-- New Password -->
+                <div class="text-left">
+                    <label for="new-password" class="block text-gray-700">New Password:</label>
+                    <input type="password" id="new-password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your new password">
+                </div>
+
+                <!-- Profile Picture Preview -->
+                <div class="text-center col-span-2 mb-6">
+                    <label for="settings-profile-picture" class="block text-gray-700">Profile Picture:</label>
+                    <input type="file" id="settings-profile-picture" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="profile-picture-preview" class="mt-4">
+                        <!-- Preview will be shown here -->
+                        <img id="profile-img" src="#" alt="Profile Preview" class="hidden w-32 h-32 rounded-full mx-auto object-cover" />
+                    </div>
+                </div>
+
+                <!-- Save Changes Button -->
+                <div class="flex justify-center col-span-2">
                     <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">Save Changes</button>
                 </div>
             </form>
