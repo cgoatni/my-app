@@ -1,63 +1,105 @@
+// Wait for the DOM to fully load before executing
+document.addEventListener("DOMContentLoaded", () => {
+    fetchUserData();
+    fetchDashboardData();
+    setupLogoutButton();
+});
+
+// Fetch and display user data
 async function fetchUserData() {
     try {
-        const response = await fetch('/api/user', { credentials: "include" });
+        const response = await fetch("/api/user", { credentials: "include" });
 
         if (!response.ok) {
             throw new Error(response.status === 401 ? "Unauthorized" : "Failed to fetch user data");
         }
 
         const user = await response.json();
-        document.getElementById("fullname").textContent = user.fullName;
+        console.log("User Data:", user); // Debugging
+
+        const fullNameElement = document.getElementById("fullname");
+        if (fullNameElement) {
+            fullNameElement.textContent = user.fullName || "Guest";
+        }
     } catch (error) {
         console.error("Error fetching user:", error);
-        window.location.href = '/login'; // Redirect if unauthorized
+        window.location.href = "/login"; // Redirect if unauthorized
     }
 }
 
-fetchUserData(); // Fetch user data when the page loads
-
-const logoutBtn = document.getElementById("logout-btn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-        await fetch('/logout', { method: "POST" });
-        window.location.href = "/login"; // Redirect to login page after logout
-    });
-} else {
-    console.warn("Logout button not found");
-}
-
-async function fetchUserCount() {
+// Fetch statistics and update the dashboard
+async function fetchDashboardData() {
     try {
-        const response = await fetch('/count');
-        const data = await response.json();
-        document.getElementById('userCount').textContent = data.userCount.toLocaleString(); // Format number with commas
+        const [userResponse, activeUsersResponse] = await Promise.all([
+            fetch("/count"),
+            fetch("/activeUsers")
+        ]);
+
+        // Check response status and handle errors
+        if (!userResponse.ok || !activeUsersResponse.ok) {
+            throw new Error("Failed to fetch one or more dashboard data endpoints");
+        }
+
+        const userData = await userResponse.json();
+        const activeUsersData = await activeUsersResponse.json();
+
+        console.log("User Count Data:", userData); // Debugging
+        console.log("Active Users Data:", activeUsersData); // Debugging
+
+        updateElementText("userCount", userData.userCount?.toLocaleString() ?? "N/A");
+        updateElementText("activeUsers", activeUsersData.activeUsers?.toLocaleString() ?? "N/A");
     } catch (error) {
-        console.error("Error fetching user count:", error);
-        document.getElementById('userCount').textContent = "Error";
+        console.error("Error fetching dashboard data:", error);
+        updateElementText("userCount", "Error");
+        updateElementText("activeUsers", "Error");
     }
 }
 
-fetchUserCount();
+// Helper function to safely update text content in an element
+function updateElementText(elementId, text) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = text;
+    } else {
+        console.warn(`Element with ID '${elementId}' not found.`);
+    }
+}
 
+// Set up logout functionality
+function setupLogoutButton() {
+    const logoutButtons = document.querySelectorAll("#logout-btn, .logout-btn");
+
+    logoutButtons.forEach(button => {
+        button.addEventListener("click", async () => {
+            try {
+                await fetch("/logout", { method: "POST" });
+                window.location.href = "/login";
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        });
+    });
+}
+
+// WebSocket for real-time active user updates with fallback polling
+let isWebSocketActive = false;
+let dashboardDataInterval = setInterval(fetchDashboardData, 5000); // Fallback polling every 5 seconds
+
+// WebSocket Connection for Real-Time Updates
 const socket = new WebSocket(`ws://${window.location.host}`);
 
-    async function fetchPageActiveUsers() {
-        try {
-            const response = await fetch('/activeUsers');
-            const data = await response.json();
-            document.getElementById('activeUsers').innerText = data.activeUsers;
-        } catch (error) {
-            console.error("Error fetching active users:", error);
-        }
+socket.addEventListener("message", async () => {
+    await fetchDashboardData(); // Refresh stats when a message is received
+    if (!isWebSocketActive) {
+        isWebSocketActive = true;
+        clearInterval(dashboardDataInterval);  // Disable polling once WebSocket is active
     }
+});
 
-    fetchPageActiveUsers();
-    setInterval(fetchPageActiveUsers, 5000);
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('expanded');
-}
-
-
-
+socket.addEventListener("open", () => console.log("WebSocket connection established."));
+socket.addEventListener("close", () => {
+    console.warn("WebSocket connection closed.");
+    isWebSocketActive = false;
+    dashboardDataInterval = setInterval(fetchDashboardData, 5000);  // Re-enable polling if WebSocket closes
+});
+socket.addEventListener("error", (err) => console.error("WebSocket error:", err));

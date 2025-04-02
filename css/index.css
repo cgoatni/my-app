@@ -1,0 +1,23 @@
+.underline-hover {
+    position: relative;
+    display: inline-block; /* Ensures the element takes up only as much space as the content */
+}
+
+.underline-hover::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; /* Adjust the position of the underline relative to the text */
+    left: 50%; /* Start from the middle */
+    width: 0; /* Start with no width */
+    height: 2px;
+    background-color: #3b82f6;
+    transition: width 0.3s ease, left 0.3s ease; /* Animate the width and left position */
+    transform: translateX(-50%); /* Center the underline */
+    transform-origin: center center; /* Set the origin for scaling to the center */
+}
+
+.underline-hover:hover::after {
+    width: 100%; /* Expand the width */
+    left: 50%; /* Keep it centered */
+    transform: translateX(-50%) scaleX(1); /* Scale the underline from the center to both sides */
+}

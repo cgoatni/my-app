@@ -3,10 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -28,22 +27,9 @@
 
     <!-- Main Content -->
     <main id="main-content" class="flex-1 p-8">
-        <div class="container mx-auto text-center py-20">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Statistics</h2>
-            <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
-                    <p id="userCount" class="text-3xl font-bold text-blue-600">Loading...</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Active Sessions</h3>
-                    <p id="activeUsers" class="text-3xl font-bold text-green-600">Loading...</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Pending Requests</h3>
-                    <p id="pendingRequests" class="text-3xl font-bold text-red-600">Loading...</p>
-                </div>
-            </div>
+        <div id="user-info" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Welcome, <span id="user-name" class="text-blue-600">Loading...</span>!</h1>
+            <!-- Additional home page content can go here -->
         </div>
     </main>
 
@@ -53,7 +39,7 @@
     </footer>
 
     <!-- External JS File -->
-    <script src="/js/dashboard.js"></script>
+    <script src="/js/home.js"></script>
 
 </body>
 

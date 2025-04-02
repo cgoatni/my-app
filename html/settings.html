@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/settings.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-gray-800 text-white shadow-md">
+        <div class="container mx-auto flex justify-between items-center px-6 py-4">
+            <h1 class="text-2xl font-semibold cursor-pointer" onclick="window.location.href='/dashboard'">Dashboard</h1>
+            <nav>
+                <ul class="flex items-center gap-6">
+                    <li><a href="/home" class="text-white hover:text-blue-400 transition">Home</a></li>
+                    <li><a href="/profile" class="text-white hover:text-blue-400 transition">Profile</a></li>
+                    <li><a href="/settings" class="text-white hover:text-blue-400 transition">Settings</a></li>
+                    <li><button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Settings Form -->
+    <main id="settings-form" class="flex-1 p-8 text-center">
+        <div class="container mx-auto max-w-lg bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Account Settings</h2>
+
+            <form class="space-y-4">
+                <div class="text-left">
+                    <label for="settings-username" class="block text-gray-700">Username:</label>
+                    <input type="text" id="settings-username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your username">
+                </div>
+
+                <div class="text-left">
+                    <label for="settings-email" class="block text-gray-700">Email:</label>
+                    <input type="email" id="settings-email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
+                </div>
+
+                <div class="text-left">
+                    <label for="settings-contact" class="block text-gray-700">Contact:</label>
+                    <input type="text" id="settings-contact" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your contact number">
+                </div>
+
+                <!-- Add other settings form fields here -->
+
+                <div class="flex justify-center">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4 text-center">
+        <p>&copy; 2025 Dashboard Inc. All rights reserved.</p>
+    </footer>
+
+    <!-- External JS File -->
+    <script src="/js/settings.js"></script>
+
+</body>
+
+</html>
