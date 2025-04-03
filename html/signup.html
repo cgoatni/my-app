@@ -12,35 +12,46 @@
         <div id="alertMessage" class="hidden text-white p-3 rounded mt-2"></div>
         <h2 class="text-2xl font-semibold text-gray-700 text-center mb-6">User Registration</h2>
         <form id="registerForm" action="/register" method="POST" onsubmit="return validateForm()">
-            <!-- Full Name -->
-            <div class="mb-4 relative">
-                <label for="fullName" class="block text-sm font-medium text-gray-600">Full Name</label>
+            <!-- Last name and First name (Left and Right) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="relative">
-                    <i id="fullNameIcon" class="fas fa-user text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="text" id="fullName" name="fullName" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('fullName')" required>
+                    <label for="lastName" class="block text-sm font-medium text-gray-600">Last Name</label>
+                    <div class="relative">
+                        <i id="lastNameIcon" class="fas fa-user text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="text" id="lastName" name="lastName" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('lastName')" required>
+                    </div>
+                </div>
+    
+                <div class="relative">
+                    <label for="firstName" class="block text-sm font-medium text-gray-600">First Name</label>
+                    <div class="relative">
+                        <i id="firstNameIcon" class="fas fa-user text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="text" id="firstName" name="firstName" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('firstName')" required>
+                    </div>
                 </div>
             </div>
     
-            <!-- Email -->
-            <div class="mb-4 relative">
-                <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+            <!-- Email and Contact (Left and Right) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="relative">
-                    <i id="emailIcon" class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="email" id="email" name="email" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('email')" required>
+                    <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+                    <div class="relative">
+                        <i id="emailIcon" class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="email" id="email" name="email" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('email')" required>
+                    </div>
+                </div>
+    
+                <div class="relative">
+                    <label for="contact" class="block text-sm font-medium text-gray-600">Contact Number</label>
+                    <div class="relative">
+                        <i id="contactIcon" class="fas fa-phone text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="text" id="contact" name="contact" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('contact'); validateContactNumber()" required>
+                    </div>
                 </div>
             </div>
     
-            <!-- Contact Number -->
-            <div class="mb-4 relative">
-                <label for="contact" class="block text-sm font-medium text-gray-600">Contact Number</label>
-                <div class="relative">
-                    <i id="contactIcon" class="fas fa-phone text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="text" id="contact" name="contact" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('contact'); validateContactNumber()" required>
-                </div>
-            </div>
-    
-            <!-- Address -->
-            <div class="mb-4 relative">
+            <!-- Address (Full Width) -->
+            <div class="mb-4 relative col-span-2">
                 <label for="address" class="block text-sm font-medium text-gray-600">Address</label>
                 <div class="relative">
                     <i id="addressIcon" class="fas fa-home text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
@@ -48,44 +59,46 @@
                 </div>
             </div>
     
-            <!-- Gender -->
-            <div class="mb-4 relative">
-                <label for="gender" class="block text-sm font-medium text-gray-600">Gender</label>
+            <!-- Gender and Date of Birth -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="relative">
-                    <i id="genderIcon" class="fas fa-venus-mars text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <select id="gender" name="gender" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('gender')" required>
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <label for="gender" class="block text-sm font-medium text-gray-600">Gender</label>
+                    <div class="relative">
+                        <i id="genderIcon" class="fas fa-venus-mars text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <select id="gender" name="gender" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('gender')" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div class="relative">
+                    <label for="dob" class="block text-sm font-medium text-gray-600">Date of Birth</label>
+                    <div class="relative">
+                        <i id="dobIcon" class="fas fa-calendar-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="date" id="dob" name="dob" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('dob')" required>
+                    </div>
                 </div>
             </div>
     
-            <!-- Date of Birth -->
-            <div class="mb-4 relative">
-                <label for="dob" class="block text-sm font-medium text-gray-600">Date of Birth</label>
+            <!-- Username and Password (Left and Right) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div class="relative">
-                    <i id="dobIcon" class="fas fa-calendar-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="date" id="dob" name="dob" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('dob')" required>
+                    <label for="username" class="block text-sm font-medium text-gray-600">Username</label>
+                    <div class="relative">
+                        <i id="usernameIcon" class="fas fa-user-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="text" id="username" name="username" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('username')" required>
+                    </div>
                 </div>
-            </div>
     
-            <!-- Username -->
-            <div class="mb-4 relative">
-                <label for="username" class="block text-sm font-medium text-gray-600">Username</label>
                 <div class="relative">
-                    <i id="usernameIcon" class="fas fa-user-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="text" id="username" name="username" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('username')" required>
-                </div>
-            </div>
-    
-            <!-- Password -->
-            <div class="mb-4 relative">
-                <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
-                <div class="relative">
-                    <i id="passwordIcon" class="fas fa-lock text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    <input type="password" id="password" name="password" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('password')" required>
+                    <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
+                    <div class="relative">
+                        <i id="passwordIcon" class="fas fa-lock text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="password" id="password" name="password" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('password')" required>
+                    </div>
                 </div>
             </div>
     

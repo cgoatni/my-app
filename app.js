@@ -85,7 +85,7 @@ const serveFile = (route, folder, file) => app.get(route, (req, res) => res.send
 // User Registration
 app.post('/register', async (req, res) => {
     try {
-        const { fullName, email, contact, address, gender, dob, username, password } = req.body;
+        const { lastName, firstName, email, contact, address, gender, dob, username, password } = req.body;
         const emailLower = email.toLowerCase();
         const usernameLower = username.toLowerCase();
 
@@ -97,7 +97,7 @@ app.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await db.collection('users').insertOne({
-            fullName, email: emailLower, contact, address, gender, dob,
+            lastName, firstName, email: emailLower, contact, address, gender, dob,
             username: usernameLower, password: hashedPassword, createdDate: new Date()
         });
 
@@ -138,8 +138,8 @@ app.post('/login', async (req, res) => {
             return res.redirect('/login?error=Invalid credentials');
         }
 
-        req.session.user = (({ fullName, email, contact, address, gender, dob, username }) =>
-            ({ fullName, email, contact, address, gender, dob, username }))(user);
+        req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username }) =>
+            ({ lastName, firstName, email, contact, address, gender, dob, username }))(user);
 
         res.redirect('/dashboard');
 

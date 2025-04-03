@@ -10,9 +10,11 @@ async function fetchUserData() {
         const response = await fetch('/api/user');
         const data = await response.json();
 
+        console.log('User data:', data);  // Debugging line to check the response
+
         if (data.email) {
             // Populate home page with user information
-            document.getElementById('user-name').innerText = data.fullName || 'Guest';
+            document.getElementById('user-name').innerText = data.firstName + ' ' + data.lastName || 'Guest';
             // Add other dynamic data as needed
         } else {
             // Redirect to login if no user data is found

@@ -10,9 +10,12 @@ async function fetchUserData() {
         const response = await fetch('/api/user');
         const data = await response.json();
 
+        console.log('User data:', data);  // Debugging line to check the response
+
         if (data.email) {
             // Populate profile fields with user data
             document.getElementById('profile-name').innerText = data.fullName || 'N/A';
+            document.getElementById('dob').innerText = data.dob || 'N/A';
             document.getElementById('profile-email').innerText = data.email || 'N/A';
             document.getElementById('profile-contact').innerText = data.contact || 'N/A';
             document.getElementById('profile-address').innerText = data.address || 'N/A';
