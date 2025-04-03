@@ -3,9 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/home.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -16,10 +18,47 @@
             <h1 class="text-2xl font-semibold cursor-pointer" onclick="window.location.href='/dashboard'">Dashboard</h1>
             <nav>
                 <ul class="flex items-center gap-6">
-                    <li><a href="/home" class="text-white hover:text-blue-400 transition">Home</a></li>
-                    <li><a href="/profile" class="text-white hover:text-blue-400 transition">Profile</a></li>
-                    <li><a href="/settings" class="text-white hover:text-blue-400 transition">Settings</a></li>
-                    <li><button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</button></li>
+                    <li class="hidden md:block"><a href="/home" class="text-white hover:text-blue-400 transition">Home</a></li>
+                    <li class="hidden md:block"><a href="/profile" class="text-white hover:text-blue-400 transition">Profile</a></li>
+                    <li class="hidden md:block"><a href="/settings" class="text-white hover:text-blue-400 transition">Settings</a></li>
+                    <li class="hidden md:block"><a id="logout-btn" class="text-white hover:text-red-400 transition">Logout</a></li>
+                    
+                    <!-- Mobile view icons with tooltips -->
+                    <li class="relative md:hidden group">
+                        <a href="/home" class="text-white hover:text-blue-400 transition">
+                            <i class="fa-solid fa-home"></i>
+                        </a>
+                        <span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            Home
+                        </span>
+                    </li>
+
+                    <li class="relative md:hidden group">
+                        <a href="/profile" class="text-white hover:text-blue-400 transition">
+                            <i class="fa-solid fa-user"></i>
+                        </a>
+                        <span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            Profile
+                        </span>
+                    </li>
+
+                    <li class="relative md:hidden group">
+                        <a href="/settings" class="text-white hover:text-blue-400 transition">
+                            <i class="fa-solid fa-cogs"></i>
+                        </a>
+                        <span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            Settings
+                        </span>
+                    </li>
+
+                    <li class="relative md:hidden group">
+                        <a id="logout-btn" class="text-white hover:text-red-400 transition">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </a>
+                        <span class="absolute left-1/2 -translate-x-1/2 top-full mt-2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                            Logout
+                        </span>
+                    </li>
                 </ul>
             </nav>
         </div>
