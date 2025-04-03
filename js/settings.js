@@ -67,51 +67,6 @@ function setupLogoutButton() {
     });
 }
 
-// Real-time updates for dashboard using WebSocket with fallback polling
-let isWebSocketActive = false;
-let dashboardDataInterval = setInterval(fetchDashboardData, 5000); // Polling every 5 seconds
-
-// WebSocket connection for real-time updates
-const socket = new WebSocket(`ws://${window.location.host}`);
-
-socket.addEventListener("message", async () => {
-    await fetchDashboardData();  // Refresh stats when a WebSocket message is received
-    if (!isWebSocketActive) {
-        isWebSocketActive = true;
-        clearInterval(dashboardDataInterval);  // Disable polling once WebSocket is active
-    }
-});
-
-socket.addEventListener("open", () => {
-    console.log("WebSocket connection established.");
-    document.getElementById("websocket-status").innerText = "Connected";  // Optional: Show WebSocket status
-});
-socket.addEventListener("close", () => {
-    console.warn("WebSocket connection closed.");
-    isWebSocketActive = false;
-    dashboardDataInterval = setInterval(fetchDashboardData, 5000);  // Re-enable polling if WebSocket closes
-    document.getElementById("websocket-status").innerText = "Disconnected";  // Show status update
-});
-socket.addEventListener("error", (err) => {
-    console.error("WebSocket error:", err);
-    document.getElementById("websocket-status").innerText = "Error";  // Show status update
-});
-
-// Function to fetch dashboard data (e.g., user stats) for real-time updates
-async function fetchDashboardData() {
-    try {
-        const response = await fetch('/api/dashboard-data');  // Modify with your actual endpoint
-        const data = await response.json();
-
-        // Example of updating dashboard data
-        document.getElementById('userCount').innerText = data.userCount || '0';
-        document.getElementById('activeSessions').innerText = data.activeSessions || '0';
-
-    } catch (err) {
-        console.error('Error loading dashboard data:', err);
-    }
-}
-
 // Validate the old password before updating
 async function validateOldPassword(oldPassword) {
     try {
@@ -143,17 +98,84 @@ document.querySelector('form').addEventListener('submit', async function(event) 
 
     const oldPassword = document.getElementById('old-password').value;
     const newPassword = document.getElementById('new-password').value;
+    const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+    // Validate if new passwords match
+    if (newPassword !== confirmNewPassword) {
+        alert("New password and confirm password do not match!");
+        return;
+    }
 
     // Validate the old password
     const isOldPasswordValid = await validateOldPassword(oldPassword);
 
     if (isOldPasswordValid) {
-        // Proceed with saving changes or updating the password
-        // You can send the new password to the server here
         console.log('Old password validated successfully! Proceeding with password change.');
+
         // Example of sending new password to server
-        // await updatePassword(newPassword);
+        await updatePassword(newPassword);
     } else {
         console.log('Old password is invalid.');
     }
 });
+
+// Function to update the password (replace this with your actual API call)
+async function updatePassword(newPassword) {
+    try {
+        const response = await fetch('/api/update-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password: newPassword }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('Password updated successfully!');
+        } else {
+            alert('Error updating password.');
+        }
+    } catch (err) {
+        console.error('Error updating password:', err);
+        alert('An error occurred while updating the password.');
+    }
+}
+
+// Real-time updates for active user data with fallback polling
+let isWebSocketActive = false;
+let dashboardDataInterval = setInterval(fetchDashboardData, 5000);  // Fallback polling
+
+// WebSocket connection for real-time updates
+const socket = new WebSocket(`ws://${window.location.host}`);
+
+socket.addEventListener("message", async () => {
+    await fetchDashboardData();  // Refresh stats when a message is received
+    if (!isWebSocketActive) {
+        isWebSocketActive = true;
+        clearInterval(dashboardDataInterval);  // Disable polling once WebSocket is active
+    }
+});
+
+socket.addEventListener("open", () => console.log("WebSocket connection established."));
+socket.addEventListener("close", () => {
+    console.warn("WebSocket connection closed.");
+    isWebSocketActive = false;
+    dashboardDataInterval = setInterval(fetchDashboardData, 5000);  // Re-enable polling if WebSocket closes
+});
+socket.addEventListener("error", (err) => console.error("WebSocket error:", err));
+
+// Function to fetch dashboard data (e.g., user stats) for real-time updates
+async function fetchDashboardData() {
+    try {
+        const response = await fetch('/api/dashboard-data');  // Modify with your actual endpoint
+        const data = await response.json();
+
+        // Update your dashboard with the fetched data
+        // Example: document.getElementById('userCount').innerText = data.userCount;
+
+    } catch (err) {
+        console.error('Error loading dashboard data:', err);
+    }
+}
+

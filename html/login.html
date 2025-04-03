@@ -5,25 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/login.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="bg-white p-8 rounded-lg shadow-lg w-96">
         <div id="alertMessage" class="hidden text-white p-3 rounded mt-2 text-center w-full"></div>
         <h2 class="text-2xl font-semibold text-gray-700 text-center mb-6">Sign in</h2>
         <form id="loginForm" action="/login" method="POST">
-            <div class="mb-4">
+            <!-- Email -->
+            <div class="mb-4 relative">
                 <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-                <input type="email" id="email" name="email" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" required>
+                <div class="relative">
+                    <i id="emailIcon" class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                    <input type="email" id="email" name="email" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('email')" required>
+                </div>
             </div>
-            <div class="mb-4">
+    
+            <!-- Password -->
+            <div class="mb-4 relative">
                 <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
-                <input type="password" id="password" name="password" class="w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" required>
+                <div class="relative">
+                    <i id="passwordIcon" class="fas fa-lock text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                    <input type="password" id="password" name="password" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('password')" required>
+                </div>
             </div>
+    
+            <!-- Submit Button -->
             <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">Sign In</button>
         </form>
+    
+        <!-- Sign up Link -->
         <p class="text-sm text-gray-500 text-center mt-4">Don't have an account? <a href="/signup" class="text-blue-600 hover:underline">Sign up</a></p>
     </div>
-
+    
     <script src="/js/login.js"></script>
 </body>
 </html>

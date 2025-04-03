@@ -15,7 +15,6 @@ async function fetchUserData() {
         }
 
         const user = await response.json();
-        console.log("User Data:", user); // Debugging
 
         const fullNameElement = document.getElementById("fullname");
         if (fullNameElement) {
@@ -42,9 +41,6 @@ async function fetchDashboardData() {
 
         const userData = await userResponse.json();
         const activeUsersData = await activeUsersResponse.json();
-
-        console.log("User Count Data:", userData); // Debugging
-        console.log("Active Users Data:", activeUsersData); // Debugging
 
         updateElementText("userCount", userData.userCount?.toLocaleString() ?? "N/A");
         updateElementText("activeUsers", activeUsersData.activeUsers?.toLocaleString() ?? "N/A");

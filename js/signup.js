@@ -43,3 +43,55 @@ document.addEventListener("DOMContentLoaded", () => {
         alertMessage.classList.remove("hidden");
     }    
 });
+
+// Add event listener to hide icon when user starts typing
+// Function to change icon based on input field content
+function updateIcon(field) {
+    var inputElement = document.getElementById(field);
+    var iconElement = document.getElementById(field + 'Icon');
+
+    if (inputElement.value.trim() !== "") {
+        iconElement.classList.remove("text-gray-400");
+        iconElement.classList.add("text-green-500"); // Change icon color to green when filled
+    } else {
+        iconElement.classList.remove("text-green-500");
+        iconElement.classList.add("text-gray-400"); // Revert icon color to gray when empty
+    }
+}
+
+// Optional: You can add validation before submission
+function validateForm() {
+    var formElements = document.querySelectorAll('#registerForm input, #registerForm select, #registerForm textarea');
+    for (var i = 0; i < formElements.length; i++) {
+        if (formElements[i].value === "") {
+            alert("Please fill out all fields.");
+            return false;
+        }
+    }
+
+    // Check if password and confirm password match
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return false;
+    }
+
+    // Check if terms checkbox is checked
+    var terms = document.getElementById('terms');
+    if (!terms.checked) {
+        alert("You must agree to the terms and conditions.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateContactNumber() {
+    var contactInput = document.getElementById("contact");
+    var contactValue = contactInput.value;
+
+    // Allow only digits and limit the length to 11
+    contactInput.value = contactValue.replace(/\D/g, '').slice(0, 11);
+}

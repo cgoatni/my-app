@@ -51,10 +51,10 @@ async function connectDB() {
     try {
         const client = new MongoClient(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         await client.connect();
-        console.log("✅ Connected to MongoDB");
+        console.log("✅ Connected to DB");
         db = client.db('SampleDB');
     } catch (error) {
-        console.error("❌ MongoDB connection failed:", error);
+        console.error("❌ DB connection failed:", error);
         process.exit(1);
     }
 }
@@ -165,14 +165,16 @@ app.post('/api/validate-password', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        // Compare the entered old password with the stored password
-        const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
-
-        if (!isPasswordValid) {
-            return res.status(400).json({ error: 'Old password is incorrect' });
-        }
-
-        res.status(200).json({ success: 'Old password is valid' });
+        // Compare passwords using a callback function
+        bcrypt.compare(oldPassword, user.password, (err, isMatch) => {
+            if (err) {
+                return res.status(500).json({ error: "Internal Server Error" });
+            }
+            if (!isMatch) {
+                return res.status(400).json({ error: 'Old password is incorrect' });
+            }
+            return res.status(200).json({ success: 'Old password is valid' });
+        });
     } catch (error) {
         console.error("❌ Error validating old password:", error);
         res.status(500).json({ error: "Internal Server Error" });
