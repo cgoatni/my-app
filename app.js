@@ -9,6 +9,7 @@ const session = require('express-session');
 const http = require("http");
 const WebSocket = require('ws');
 const { sendWelcomeEmail } = require('./js/emailer');
+const { sendContactFormEmail } = require('./js/emailer');
 
 const app = express();
 const server = http.createServer(app);
@@ -78,7 +79,7 @@ servePage('/settings', 'settings.html'); // Settings page route
 
 // Serve static files
 const serveFile = (route, folder, file) => app.get(route, (req, res) => res.sendFile(path.join(__dirname, folder, file)));
-['emailer', 'signup', 'login', 'dashboard', 'home', 'profile', 'settings'].forEach(file => serveFile(`/js/${file}.js`, 'js', `${file}.js`));
+['emailer', 'index', 'signup', 'login', 'dashboard', 'home', 'profile', 'settings'].forEach(file => serveFile(`/js/${file}.js`, 'js', `${file}.js`));
 ['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings'].forEach(file => serveFile(`/css/${file}.css`, 'css', `${file}.css`));
 
 // User Registration
@@ -180,6 +181,28 @@ app.post('/api/validate-password', async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+// Contact form submission endpoint
+app.post("/submit-contact", async (req, res) => {
+    const { name, email, message } = req.body;
+
+    // Validate the form fields
+    if (!name || !email || !message) {
+        return res.status(400).json({ error: "All fields are required!" });
+    }
+
+    // Call the function to send email
+    const response = await sendContactFormEmail(name, email, message);
+
+    // Return the appropriate response based on email sending success
+    if (response.success) {
+        res.json({ message: response.message });
+
+    } else {
+        res.status(500).json({ error: response.error });
+    }
+});
+
 
 // Get Current User
 app.get('/api/user', (req, res) => {
