@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 .underline-hover {
     position: relative;
     display: inline-block; /* Ensures the element takes up only as much space as the content */

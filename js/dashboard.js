@@ -5,6 +5,28 @@ document.addEventListener("DOMContentLoaded", () => {
     setupLogoutButton();
 });
 
+// Check if the user is logged in and has admin access
+fetch('/api/user')
+.then(response => response.json())
+.then(data => {
+    const dashboardLink = document.getElementById('dashboard-link');
+    
+    if (data.userAccess === 'Admin') {
+        // Allow the link to be clicked for admin users
+        dashboardLink.onclick = () => {
+            window.location.href = '/dashboard';
+        };
+    } else {
+        // Disable clicking for non-admin users but keep the link visible
+        dashboardLink.style.pointerEvents = 'none'; // Disable clicking
+    }
+})
+.catch(() => {
+    // Handle any errors, like if the user is not logged in
+    console.log('User is not logged in or error occurred');
+});
+
+
 // Fetch and display user data
 async function fetchUserData() {
     try {

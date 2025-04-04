@@ -4,6 +4,27 @@ window.onload = function() {
     setupLogoutButton();
 };
 
+// Check if the user is logged in and has admin access
+fetch('/api/user')
+.then(response => response.json())
+.then(data => {
+    const dashboardLink = document.getElementById('dashboard-link');
+    
+    if (data.userAccess === 'Admin') {
+        // Allow the link to be clicked for admin users
+        dashboardLink.onclick = () => {
+            window.location.href = '/dashboard';
+        };
+    } else {
+        // Disable clicking for non-admin users but keep the link visible
+        dashboardLink.style.pointerEvents = 'none'; // Disable clicking
+    }
+})
+.catch(() => {
+    // Handle any errors, like if the user is not logged in
+    console.log('User is not logged in or error occurred');
+});
+
 // Function to fetch user data and populate the home page
 async function fetchUserData() {
     try {
@@ -70,9 +91,6 @@ async function fetchDashboardData() {
     try {
         const response = await fetch('/api/dashboard-data');  // Modify with your actual endpoint
         const data = await response.json();
-
-        // Update your dashboard with the fetched data
-        // Example: document.getElementById('userCount').innerText = data.userCount;
 
     } catch (err) {
         console.error('Error loading dashboard data:', err);

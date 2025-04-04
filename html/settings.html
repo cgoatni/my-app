@@ -15,7 +15,7 @@
     <!-- Header -->
     <header class="bg-gray-800 text-white shadow-md">
         <div class="container mx-auto flex justify-between items-center px-6 py-4">
-            <h1 class="text-2xl font-semibold cursor-pointer" onclick="window.location.href='/dashboard'">Dashboard</h1>
+            <h1 id="dashboard-link" class="text-2xl font-semibold cursor-pointer">Dashboard</h1>
             <nav>
                 <ul class="flex items-center gap-6">
                     <li class="hidden md:block"><a href="/home" class="text-white hover:text-blue-400 transition">Home</a></li>
@@ -73,7 +73,7 @@
                 <!-- Last Name -->
                 <div class="col-span-1">
                     <label for="settings-lastname" class="block text-gray-700 font-medium">Last name:</label>
-                    <input type="text" id="lastname" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your lastname">
+                    <input type="text" id="settings-lastname" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your lastname">
                 </div>
 
                 <!-- First Name -->

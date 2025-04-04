@@ -8,8 +8,7 @@ const path = require('path');
 const session = require('express-session');
 const http = require("http");
 const WebSocket = require('ws');
-const { sendWelcomeEmail } = require('./js/emailer');
-const { sendContactFormEmail } = require('./js/emailer');
+const { sendWelcomeEmail, sendContactFormEmail } = require('./js/emailer');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +20,7 @@ app.use(express.static(path.join(__dirname, "html")));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Session middleware
 const sessionMiddleware = session({
     secret: 'sampleOnly',
     resave: false,
@@ -34,7 +34,8 @@ const sessionMiddleware = session({
 
 app.use(sessionMiddleware);
 
-// Attach session to WebSocket
+// WebSocket Active Users Tracking
+let activeUsers = new Set();
 wss.on("connection", (ws, req) => {
     sessionMiddleware(req, {}, () => {
         if (req.session?.user) {
@@ -47,6 +48,7 @@ wss.on("connection", (ws, req) => {
     });
 });
 
+// Connect to MongoDB
 let db;
 async function connectDB() {
     try {
@@ -67,22 +69,88 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve HTML pages (Home, Profile, Settings, etc.)
+// Session Role Middleware
+function ensureAdmin(req, res, next) {
+    const user = req.session.user;
+    if (user?.userAccess === 'Admin') return next();
+    res.redirect('/home');
+}
+
+// Serve HTML pages
 const servePage = (route, page) => app.get(route, (req, res) => res.sendFile(path.join(__dirname, 'html', page)));
 servePage('/', 'index.html');
 servePage('/signup', 'signup.html');
 servePage('/login', 'login.html');
 servePage('/dashboard', 'dashboard.html');
-servePage('/home', 'home.html');         // Home page route
-servePage('/profile', 'profile.html');   // Profile page route
-servePage('/settings', 'settings.html'); // Settings page route
+servePage('/home', 'home.html');
+servePage('/profile', 'profile.html');
+servePage('/settings', 'settings.html');
 
-// Serve static files
+// Serve Dashboard page (only accessible to admin users)
+app.get('/dashboard', ensureAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'html', 'dashboard.html'));
+});
+
+// Serve static JS and CSS
 const serveFile = (route, folder, file) => app.get(route, (req, res) => res.sendFile(path.join(__dirname, folder, file)));
 ['emailer', 'index', 'signup', 'login', 'dashboard', 'home', 'profile', 'settings'].forEach(file => serveFile(`/js/${file}.js`, 'js', `${file}.js`));
 ['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings'].forEach(file => serveFile(`/css/${file}.css`, 'css', `${file}.css`));
 
-// User Registration
+// API: Get current user
+app.get('/api/user', (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+    res.json(req.session.user);
+});
+
+// API: Dashboard data
+app.get('/api/dashboard-data', ensureAdmin, async (req, res) => {
+    try {
+        const userCount = await db.collection('users').countDocuments();
+        const activeUserCount = activeUsers.size;
+        res.json({ userCount, activeUsers: activeUserCount });
+    } catch (error) {
+        console.error("❌ Error fetching dashboard data:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// API: Active Users Count
+app.get('/activeUsers', (req, res) => {
+    res.json({ activeUsers: activeUsers.size });
+});
+
+// API: User count
+app.get('/count', async (req, res) => {
+    try {
+        const userCount = await db.collection('users').countDocuments();
+        res.json({ userCount });
+    } catch (error) {
+        console.error("❌ Error fetching user count:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// API: Validate old password
+app.post('/api/validate-password', async (req, res) => {
+    try {
+        const { oldPassword } = req.body;
+        if (!req.session.user) return res.status(401).json({ error: 'User is not logged in' });
+
+        const user = await db.collection('users').findOne({ email: req.session.user.email });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+
+        bcrypt.compare(oldPassword, user.password, (err, isMatch) => {
+            if (err) return res.status(500).json({ error: "Internal Server Error" });
+            if (!isMatch) return res.status(400).json({ error: 'Old password is incorrect' });
+            return res.status(200).json({ success: 'Old password is valid' });
+        });
+    } catch (error) {
+        console.error("❌ Error validating old password:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// POST: Register
 app.post('/register', async (req, res) => {
     try {
         const { lastName, firstName, email, contact, address, gender, dob, username, password } = req.body;
@@ -98,37 +166,20 @@ app.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await db.collection('users').insertOne({
             lastName, firstName, email: emailLower, contact, address, gender, dob,
-            username: usernameLower, password: hashedPassword, createdDate: new Date()
+            username: usernameLower, password: hashedPassword, createdDate: new Date(), userAccess: 'userOnly'
         });
 
         if (!result.insertedId) return res.status(500).json({ error: "Registration failed" });
 
         await sendWelcomeEmail(email);
         res.status(200).json({ success: "Registration successful!" });
-
     } catch (error) {
         console.error("❌ Registration Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-// Fetch User Count
-app.get('/count', async (req, res) => {
-    try {
-        const userCount = await db.collection('users').countDocuments();
-        res.json({ userCount });
-    } catch (error) {
-        console.error("❌ Error fetching user count:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// Fetch Active Users
-app.get('/activeUsers', (req, res) => {
-    res.json({ activeUsers: activeUsers.size });
-});
-
-// User Login
+// POST: Login
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -138,91 +189,41 @@ app.post('/login', async (req, res) => {
             return res.redirect('/login?error=Invalid credentials');
         }
 
-        req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username }) =>
-            ({ lastName, firstName, email, contact, address, gender, dob, username }))(user);
+        req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, userAccess }) =>
+            ({ lastName, firstName, email, contact, address, gender, dob, username, userAccess }))(user);
 
-        res.redirect('/dashboard');
-
+        const redirectPath = user.userAccess === 'Admin' ? '/dashboard' : '/home';
+        res.redirect(redirectPath);
     } catch (error) {
         console.error("❌ Login Error:", error);
         res.redirect('/login?error=Something went wrong');
     }
 });
 
-// Validate old password before updating password
-app.post('/api/validate-password', async (req, res) => {
-    try {
-        const { oldPassword } = req.body;
-
-        // Ensure the user is logged in
-        if (!req.session.user) {
-            return res.status(401).json({ error: 'User is not logged in' });
-        }
-
-        // Fetch the user's current password from the database
-        const user = await db.collection('users').findOne({ email: req.session.user.email });
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Compare passwords using a callback function
-        bcrypt.compare(oldPassword, user.password, (err, isMatch) => {
-            if (err) {
-                return res.status(500).json({ error: "Internal Server Error" });
-            }
-            if (!isMatch) {
-                return res.status(400).json({ error: 'Old password is incorrect' });
-            }
-            return res.status(200).json({ success: 'Old password is valid' });
-        });
-    } catch (error) {
-        console.error("❌ Error validating old password:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// Contact form submission endpoint
+// POST: Contact Form
 app.post("/submit-contact", async (req, res) => {
     const { name, email, message } = req.body;
+    if (!name || !email || !message) return res.status(400).json({ error: "All fields are required!" });
 
-    // Validate the form fields
-    if (!name || !email || !message) {
-        return res.status(400).json({ error: "All fields are required!" });
-    }
-
-    // Call the function to send email
     const response = await sendContactFormEmail(name, email, message);
-
-    // Return the appropriate response based on email sending success
     if (response.success) {
         res.json({ message: response.message });
-
     } else {
         res.status(500).json({ error: response.error });
     }
 });
 
-
-// Get Current User
-app.get('/api/user', (req, res) => {
-    if (!req.session.user) return res.redirect('/login');
-    res.json(req.session.user);
-});
-
-// Logout
+// POST: Logout
 app.post("/logout", (req, res) => {
     if (req.session.user) activeUsers.delete(req.session.user.email);
-
     req.session.destroy(err => {
         if (err) return res.status(500).json({ error: "Logout failed" });
-
         res.clearCookie('connect.sid');
         res.redirect('/login');
     });
 });
 
-// Fetch All Users (for testing/debugging)
+// GET: All users (for testing)
 app.get('/users', async (req, res) => {
     try {
         const users = await db.collection('users').find().toArray();
@@ -233,42 +234,12 @@ app.get('/users', async (req, res) => {
     }
 });
 
-// WebSocket Active Users Tracking
-let activeUsers = new Set();
-wss.on("connection", (ws, req) => {
-    sessionMiddleware(req, {}, () => {
-        if (req.session?.user) {
-            activeUsers.add(req.session.user.email);
-
-            ws.on("close", () => {
-                activeUsers.delete(req.session.user.email);
-            });
-        }
-    });
-});
-
-// Fetch Dashboard Data
-app.get('/api/dashboard-data', async (req, res) => {
-    try {
-        // Get user count from the database
-        const userCount = await db.collection('users').countDocuments();
-        
-        // Get active users from the activeUsers set
-        const activeUserCount = activeUsers.size;
-
-        // Send the data as a JSON response
-        res.json({ userCount, activeUsers: activeUserCount });
-    } catch (error) {
-        console.error("❌ Error fetching dashboard data:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'html', '404.html'));
 });
 
 // Start Server
 connectDB().then(() => {
     server.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}/`));
-});
-// Handle 404 errors
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'html', '404.html'));
 });
