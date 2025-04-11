@@ -12,55 +12,190 @@
 
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-gray-800 text-white shadow-md">
         <div class="container mx-auto flex justify-between items-center px-6 py-4">
             <h1 id="dashboard-link" class="text-2xl font-semibold cursor-pointer">Dashboard</h1>
-
-            <!-- Desktop Menu -->
             <nav class="hidden md:block">
-                <ul id="menu-items" class="flex items-center gap-6">
-                    <!-- Menu items will be dynamically inserted here -->
-                </ul>
+                <ul id="menu-items" class="flex items-center gap-6"></ul>
             </nav>
-
-            <!-- Mobile Menu (Hidden by default) -->
             <nav class="md:hidden flex items-center gap-6">
-                <ul id="mobile-menu-items" class="flex items-center gap-6">
-                    <!-- Mobile menu items will be inserted here as icons only -->
-                </ul>
+                <ul id="mobile-menu-items" class="flex items-center gap-6"></ul>
             </nav>
         </div>
     </header>
 
-
-    <!-- Main Content -->
     <main id="main-content" class="flex-1 p-8">
-        <div class="container mx-auto text-center py-20">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Statistics</h2>
-            <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
-                    <p id="userCount" class="text-3xl font-bold text-blue-600">Loading...</p>
+        <div class="container mx-auto px-4">
+            <section class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Statistics</h2>
+                <div class="grid sm:grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <h3 class="text-xl font-semibold text-gray-700">Total Users</h3>
+                        <p id="userCount" class="text-3xl font-bold text-blue-600">Loading...</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <h3 class="text-xl font-semibold text-gray-700">Active Sessions</h3>
+                        <p id="activeUsers" class="text-3xl font-bold text-green-600">Loading...</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <h3 class="text-xl font-semibold text-gray-700">Pending Requests</h3>
+                        <p id="pendingRequests" class="text-3xl font-bold text-red-600">Loading...</p>
+                    </div>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Active Sessions</h3>
-                    <p id="activeUsers" class="text-3xl font-bold text-green-600">Loading...</p>
+            </section>
+            
+            <section class="bg-white p-6 rounded-lg shadow mb-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">Registered Users</h3>
+                    <button onclick="openModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        + Add User
+                    </button>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <h3 class="text-xl font-semibold text-gray-700">Pending Requests</h3>
-                    <p id="pendingRequests" class="text-3xl font-bold text-red-600">Loading...</p>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto border border-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Name</th>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Email</th>
+                                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList" class="text-gray-700 divide-y divide-gray-200"></tbody>
+                    </table>
                 </div>
-            </div>
+            </section>
         </div>
     </main>
 
-    <!-- Footer -->
+    <div id="addUserModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
+        <div class="bg-white w-full sm:w-3/4 lg:w-2/3 xl:w-1/2 p-8 rounded-lg shadow-lg relative transition-opacity duration-300 opacity-0" id="modal-content">
+            <button type="button" onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
+                &times;
+            </button>
+
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Add User</h2>
+
+            <form id="registerForm" action="/register" method="POST" onsubmit="return validateForm()">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="relative">
+                        <label for="lastName" class="block text-sm font-medium text-gray-600">Last Name</label>
+                        <div class="relative">
+                            <i id="lastNameIcon" class="fas fa-user text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="text" id="lastName" name="lastName" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('lastName')" required>
+                        </div>
+                    </div>
+        
+                    <div class="relative">
+                        <label for="firstName" class="block text-sm font-medium text-gray-600">First Name</label>
+                        <div class="relative">
+                            <i id="firstNameIcon" class="fas fa-user text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="text" id="firstName" name="firstName" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('firstName')" required>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="relative">
+                        <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+                        <div class="relative">
+                            <i id="emailIcon" class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="email" id="email" name="email" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('email')" required>
+                        </div>
+                    </div>
+        
+                    <div class="relative">
+                        <label for="contact" class="block text-sm font-medium text-gray-600">Contact Number</label>
+                        <div class="relative">
+                            <i id="contactIcon" class="fas fa-phone text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="text" id="contact" name="contact" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('contact'); validateContactNumber()" required>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="mb-4 relative col-span-2">
+                    <label for="address" class="block text-sm font-medium text-gray-600">Address</label>
+                    <div class="relative">
+                        <i id="addressIcon" class="fas fa-home text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <textarea id="address" name="address" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" rows="2" oninput="updateIcon('address')" required></textarea>
+                    </div>
+                </div>
+        
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="relative">
+                        <label for="gender" class="block text-sm font-medium text-gray-600">Gender</label>
+                        <div class="relative">
+                            <i id="genderIcon" class="fas fa-venus-mars text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <select id="gender" name="gender" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('gender')" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+        
+                    <div class="relative">
+                        <label for="dob" class="block text-sm font-medium text-gray-600">Date of Birth</label>
+                        <div class="relative">
+                            <i id="dobIcon" class="fas fa-calendar-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="date" id="dob" name="dob" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('dob')" required>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="mb-4 relative">
+                    <label for="role" class="block text-sm font-medium text-gray-600">Role</label>
+                    <div class="relative">
+                        <i id="roleIcon" class="fas fa-user-shield text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <select id="role" name="role" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('role')" required>
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="Admin">Admin</option>
+                            <option value="userOnly">User</option>
+                            <option value="guest">Guest</option>
+                        </select>
+                    </div>
+                </div>
+        
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="relative">
+                        <label for="username" class="block text-sm font-medium text-gray-600">Username</label>
+                        <div class="relative">
+                            <i id="usernameIcon" class="fas fa-user-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="text" id="username" name="username" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('username')" required>
+                        </div>
+                    </div>
+        
+                    <div class="relative">
+                        <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
+                        <div class="relative">
+                            <i id="passwordIcon" class="fas fa-lock text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <input type="password" id="password" name="password" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('password')" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4 relative">
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-600">Confirm Password</label>
+                    <div class="relative">
+                        <i id="confirmPasswordIcon" class="fas fa-lock text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="w-full mt-1 p-2 pl-10 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300" oninput="updateIcon('confirmPassword')" required>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" onclick="closeModal()" class="bg-gray-200 text-gray-800 p-2 rounded-lg hover:bg-gray-300 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="bg-gray-800 text-white py-4 text-center">
         <p>&copy; 2025 Dashboard Inc. All rights reserved.</p>
     </footer>
 
-    <!-- External JS File -->
     <script src="/js/dashboard.js"></script>
 
 </body>
