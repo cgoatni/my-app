@@ -74,9 +74,10 @@ app.use((req, res, next) => {
 
 // Session Role Middleware
 function ensureAdmin(req, res, next) {
-    const user = req.session.user;
-    if (user?.role === 'Admin') return next();
-    res.redirect('/home');
+    if (req.session.user && req.session.user.role === 'Admin') {
+        return next();
+    }
+    res.status(404).sendFile(path.join(__dirname, 'html', '404.html'));
 }
 
 // Serve HTML pages
@@ -84,7 +85,6 @@ const servePage = (route, page) => app.get(route, (req, res) => res.sendFile(pat
 servePage('/', 'index.html');
 servePage('/signup', 'signup.html');
 servePage('/login', 'login.html');
-servePage('/dashboard', 'dashboard.html');
 servePage('/home', 'home.html');
 servePage('/profile', 'profile.html');
 servePage('/settings', 'settings.html');
