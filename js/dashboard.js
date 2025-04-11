@@ -1,31 +1,109 @@
 // Wait for the DOM to fully load before executing
 document.addEventListener("DOMContentLoaded", () => {
     fetchUserData();
+    fetchMenuData();
     fetchDashboardData();
     setupLogoutButton();
 });
 
 // Check if the user is logged in and has admin access
 fetch('/api/user')
-.then(response => response.json())
-.then(data => {
-    const dashboardLink = document.getElementById('dashboard-link');
-    
-    if (data.userAccess === 'Admin') {
-        // Allow the link to be clicked for admin users
-        dashboardLink.onclick = () => {
-            window.location.href = '/dashboard';
-        };
-    } else {
-        // Disable clicking for non-admin users but keep the link visible
-        dashboardLink.style.pointerEvents = 'none'; // Disable clicking
-    }
-})
-.catch(() => {
-    // Handle any errors, like if the user is not logged in
-    console.log('User is not logged in or error occurred');
-});
+    .then(response => response.json())
+    .then(data => {
+        const dashboardLink = document.getElementById('dashboard-link');
+        
+        if (data.role === 'Admin') {
+            // Allow the link to be clicked for admin users
+            dashboardLink.onclick = () => {
+                window.location.href = '/dashboard';
+            };
+        } else {
+            // Disable clicking for non-admin users but keep the link visible
+            dashboardLink.style.pointerEvents = 'none'; // Disable clicking
+        }
+    })
+    .catch(() => {
+        // Handle any errors, like if the user is not logged in
+        console.log('User is not logged in or error occurred');
+    });
 
+// Fetch and display menu data from the backend
+async function fetchMenuData() {
+    try {
+        const response = await fetch('/menu', { credentials: "include" });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch menu data");
+        }
+
+        const menuItems = await response.json();
+
+        const menuContainer = document.getElementById('menu-items');
+        const mobileMenuContainer = document.getElementById('mobile-menu-items');
+
+        menuContainer.innerHTML = '';
+        mobileMenuContainer.innerHTML = '';
+
+        // Fetch the current user's role
+        const userResponse = await fetch('/api/user');
+        const user = await userResponse.json();
+        const userRole = user.role; // This is either 'Admin', 'userOnly', etc.
+
+        menuItems.forEach(item => {
+            const isLogout = item.name.toLowerCase() === 'logout';
+            const isRoleAllowed = item.role.some(role => userRole === role);  // Check if the user's role is allowed for this item
+
+            if (!isRoleAllowed) return; // Skip menu item if the user role doesn't match
+
+            // Desktop menu
+            const desktopLi = document.createElement('li');
+            const desktopA = document.createElement('a');
+            desktopA.classList.add('text-white', 'transition');
+            desktopA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-400');
+            desktopA.href = item.path || '#';
+            if (item.id) desktopA.id = item.id;
+
+            const icon = document.createElement('i');
+            icon.className = item.icon;
+            desktopA.appendChild(icon);
+            desktopA.appendChild(document.createTextNode(` ${item.name}`));
+            desktopLi.appendChild(desktopA);
+            menuContainer.appendChild(desktopLi);
+
+            // Mobile menu
+            const mobileLi = document.createElement('li');
+            const mobileA = document.createElement('a');
+            mobileA.classList.add('text-white', 'transition');
+            mobileA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-400');
+            mobileA.href = item.path || '#';
+            if (item.id) mobileA.id = `${item.id}-mobile`; // Avoid duplicate ID
+
+            const mobileIcon = document.createElement('i');
+            mobileIcon.className = item.icon;
+            mobileA.appendChild(mobileIcon);
+            mobileLi.appendChild(mobileA);
+            mobileMenuContainer.appendChild(mobileLi);
+
+            // Handle Logout functionality
+            if (isLogout) {
+                desktopA.addEventListener("click", async (e) => {
+                    e.preventDefault();  // Prevent default anchor behavior
+                    await logoutUser();
+                });
+                mobileA.addEventListener("click", async (e) => {
+                    e.preventDefault();  // Prevent default anchor behavior
+                    await logoutUser();
+                });
+            }
+        });
+
+        // 👇 Call this after menus are generated
+        setupLogoutButton();
+
+    } catch (error) {
+        console.error("Error fetching menu data:", error);
+    }
+}
 
 // Fetch and display user data
 async function fetchUserData() {
@@ -86,6 +164,8 @@ function updateElementText(elementId, text) {
 // Set up logout functionality
 function setupLogoutButton() {
     const logoutButtons = document.querySelectorAll("#logout-btn, .logout-btn");
+
+    console.log("Setting up logout buttons:", logoutButtons); // Debugging line
 
     logoutButtons.forEach(button => {
         button.addEventListener("click", async () => {

@@ -38,7 +38,10 @@ app.use(sessionMiddleware);
 let activeUsers = new Set();
 wss.on("connection", (ws, req) => {
     sessionMiddleware(req, {}, () => {
+        console.log("WebSocket connection established");
         if (req.session?.user) {
+            console.log("User connected:", req.session.user.email);
+            ws.send(JSON.stringify({ message: "Welcome to the WebSocket server!" }));
             activeUsers.add(req.session.user.email);
 
             ws.on("close", () => {
@@ -72,7 +75,7 @@ app.use((req, res, next) => {
 // Session Role Middleware
 function ensureAdmin(req, res, next) {
     const user = req.session.user;
-    if (user?.userAccess === 'Admin') return next();
+    if (user?.role === 'Admin') return next();
     res.redirect('/home');
 }
 
@@ -166,7 +169,7 @@ app.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await db.collection('users').insertOne({
             lastName, firstName, email: emailLower, contact, address, gender, dob,
-            username: usernameLower, password: hashedPassword, createdDate: new Date(), userAccess: 'userOnly'
+            username: usernameLower, password: hashedPassword, createdDate: new Date(), role: 'userOnly'
         });
 
         if (!result.insertedId) return res.status(500).json({ error: "Registration failed" });
@@ -189,14 +192,34 @@ app.post('/login', async (req, res) => {
             return res.redirect('/login?error=Invalid credentials');
         }
 
-        req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, userAccess }) =>
-            ({ lastName, firstName, email, contact, address, gender, dob, username, userAccess }))(user);
+        req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, role }) =>
+            ({ lastName, firstName, email, contact, address, gender, dob, username, role }))(user);
 
-        const redirectPath = user.userAccess === 'Admin' ? '/dashboard' : '/home';
+        const redirectPath = user.role === 'Admin' ? '/dashboard' : '/home';
         res.redirect(redirectPath);
     } catch (error) {
         console.error("❌ Login Error:", error);
         res.redirect('/login?error=Something went wrong');
+    }
+});
+
+function getUserRole(req) {
+    return req.session.user ? req.session.user.role : null;
+}
+
+app.get('/menu', async (req, res) => {
+    const userRole = getUserRole(req); 
+    
+    if (!userRole) {
+        return res.status(403).json({ error: "User role not found or not authorized" });
+    }
+
+    try {
+        const menuItems = await req.db.collection('menu').find({ role: userRole }).toArray();
+        res.json(menuItems);
+    } catch (error) {
+        console.error("❌ Error fetching menu items:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

@@ -16,40 +16,23 @@
     <header class="bg-gray-800 text-white shadow-md">
         <div class="container mx-auto flex justify-between items-center px-6 py-4">
             <h1 id="dashboard-link" class="text-2xl font-semibold cursor-pointer">Dashboard</h1>
-            <nav>
-                <ul class="flex items-center gap-6">
-                    <li class="hidden md:block"><a href="/home" class="text-white hover:text-blue-400 transition">Home</a></li>
-                    <li class="hidden md:block"><a href="/profile" class="text-white hover:text-blue-400 transition">Profile</a></li>
-                    <li class="hidden md:block"><a href="/settings" class="text-white hover:text-blue-400 transition">Settings</a></li>
-                    <li class="hidden md:block"><a id="logout-btn" class="text-white hover:text-red-400 transition">Logout</a></li>
-                    
-                    <!-- Mobile view icons -->
-                    <li class="md:hidden">
-                        <a href="/home" class="text-white hover:text-blue-400 transition">
-                            <i class="fa-solid fa-home"></i>
-                        </a>
-                    </li>
-                    <li class="md:hidden">
-                        <a href="/profile" class="text-white hover:text-blue-400 transition">
-                            <i class="fa-solid fa-user"></i>
-                        </a>
-                    </li>
-                    <li class="md:hidden">
-                        <a href="/settings" class="text-white hover:text-blue-400 transition">
-                            <i class="fa-solid fa-cogs"></i>
-                        </a>
-                    </li>
-                    <li class="md:hidden">
-                        <a id="logout-btn" class="text-white hover:text-red-400 transition">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </a>
-                    </li>
 
-                    <!-- <li><button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">Logout</button></li> -->
+            <!-- Desktop Menu -->
+            <nav class="hidden md:block">
+                <ul id="menu-items" class="flex items-center gap-6">
+                    <!-- Menu items will be dynamically inserted here -->
+                </ul>
+            </nav>
+
+            <!-- Mobile Menu (Hidden by default) -->
+            <nav class="md:hidden flex items-center gap-6">
+                <ul id="mobile-menu-items" class="flex items-center gap-6">
+                    <!-- Mobile menu items will be inserted here as icons only -->
                 </ul>
             </nav>
         </div>
     </header>
+
 
     <!-- Main Content -->
     <main id="main-content" class="flex-1 p-8">
