@@ -83,7 +83,7 @@
 
     <div id="userModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50">
         <div class="bg-white w-full sm:w-3/4 lg:w-2/3 xl:w-1/2 p-8 rounded-lg shadow-lg relative transition-opacity duration-300 opacity-0" id="modal-content">
-            <button type="button" onclick="closeModal()" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
+            <button type="button" id="closeModal" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800">
                 &times;
             </button>
     
@@ -148,8 +148,8 @@
                         <label for="role" class="block text-sm font-medium text-gray-600">Role</label>
                         <select id="role" name="role" class="w-full mt-1 p-2 border rounded-lg" required>
                             <option value="Admin">Admin</option>
-                            <option value="User">User</option>
-                            <option value="Guest">Guest</option>
+                            <option value="userOnly">User</option>
+                            <option value="staff">Staff</option>
                         </select>
                     </div>
     
@@ -175,7 +175,7 @@
                 </div>
     
                 <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" onclick="closeModal()" class="bg-gray-200 text-gray-800 p-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                    <button id="closeModal" type="button" class="bg-gray-200 text-gray-800 p-2 rounded-lg hover:bg-gray-300 transition">Cancel</button>
                     <button type="submit" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition" id="submitBtn">Add User</button>
                 </div>
             </form>

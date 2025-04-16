@@ -1,96 +1,154 @@
 document.addEventListener("DOMContentLoaded", () => {
-    fetchDashboardData();
-    fetchUserList();
+    loadDashboardData();
+    loadUserList();
 });
 
-async function fetchDashboardData() {
+// ================== DASHBOARD FUNCTIONS ==================
+
+// Fetch and display dashboard stats
+async function loadDashboardData() {
     try {
-        const [userResponse, activeUsersResponse] = await Promise.all([
+        const [userRes, activeRes] = await Promise.all([
             fetch("/count"),
             fetch("/activeUsers")
         ]);
-        if (!userResponse.ok || !activeUsersResponse.ok) throw new Error("Failed to fetch dashboard data");
 
-        const userData = await userResponse.json();
-        const activeUsersData = await activeUsersResponse.json();
+        if (!userRes.ok || !activeRes.ok) throw new Error("Failed to fetch dashboard data");
 
-        updateElementText("userCount", userData.userCount?.toLocaleString() ?? "N/A");
-        updateElementText("activeUsers", activeUsersData.activeUsers?.toLocaleString() ?? "N/A");
-    } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        updateElementText("userCount", "Error");
-        updateElementText("activeUsers", "Error");
+        const { userCount } = await userRes.json();
+        const { activeUsers } = await activeRes.json();
+
+        updateText("userCount", userCount?.toLocaleString() ?? "N/A");
+        updateText("activeUsers", activeUsers?.toLocaleString() ?? "N/A");
+    } catch (err) {
+        console.error("Dashboard error:", err);
+        updateText("userCount", "Error");
+        updateText("activeUsers", "Error");
     }
 }
 
-async function fetchUserList() {
+// ================== USER LIST FUNCTIONS ==================
+
+// Fetch and render user list
+async function loadUserList() {
+    const container = document.getElementById("userList");
+    toggleLoader(true);
     try {
-        const response = await fetch('/users');
-        if (!response.ok) throw new Error("Failed to fetch user list");
+        const res = await fetch("/users");
+        if (!res.ok) throw new Error("Failed to fetch user list");
 
-        const users = await response.json();
-        const userListContainer = document.getElementById('userList');
-        userListContainer.innerHTML = '';
-
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td class="px-4 py-2 border">${user.lastName + ' ' + user.firstName}</td>
-                <td class="px-4 py-2 border">${user.email}</td>
-                <td class="px-4 py-2 border">${user.role}</td>
-                <td class="px-4 py-2 border space-x-2">
-                    <button onclick="editUser('${user._id}')" class="bg-green-400 text-white px-3 py-1 rounded hover:bg-green-500 transition">Update</button>
-                    <button onclick="deleteUser('${user._id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Delete</button>
-                </td>
-            `;
-            userListContainer.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Error fetching user list:", error);
-        document.getElementById('userList').innerHTML = '<tr><td colspan="4" class="text-center text-red-500">Failed to load users</td></tr>';
+        const users = await res.json();
+        container.innerHTML = users.map(renderUserRow).join('');
+    } catch (err) {
+        console.error("User list error:", err);
+        container.innerHTML = `<tr><td colspan="4" class="text-center text-red-500">Failed to load users</td></tr>`;
+    } finally {
+        toggleLoader(false);
     }
 }
 
-document.addEventListener("DOMContentLoaded", fetchUserList);
+// Render a single user row
+function renderUserRow(user) {
+    return `
+        <tr>
+            <td class="px-4 py-2 border">${user.lastName} ${user.firstName}</td>
+            <td class="px-4 py-2 border">${user.email}</td>
+            <td class="px-4 py-2 border">${user.role}</td>
+            <td class="px-4 py-2 border space-x-2">
+                <button onclick="editUser('${user._id}')" class="bg-green-400 text-white px-3 py-1 rounded hover:bg-green-500">Update</button>
+                <button onclick="deleteUser('${user._id}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+            </td>
+        </tr>
+    `;
+}
 
+// ================== USER MODAL FUNCTIONS ==================
+
+// Open the modal
 function openModal(user = null) {
+    showUserModal(user);
+}
+
+// Show modal with user data for add or update
+function showUserModal(user = null) {
+    const form = document.getElementById("userForm");
     const modal = document.getElementById("userModal");
-    const modalTitle = document.getElementById("modalTitle");
+    const modalContent = document.getElementById("modal-content");
+    const title = document.getElementById("modalTitle");
     const submitBtn = document.getElementById("submitBtn");
 
+    // Reset modal state
+    modal.classList.remove("hidden", "opacity-0", "scale-95");
+    modal.classList.add("opacity-100", "scale-100");
+
+    // Set modal title and button text
+    title.innerText = user ? "Update User" : "Add User";
+    submitBtn.innerText = user ? "Update User" : "Add User";
+
+    // Reset form fields
+    form.reset();
+
+    // Populate form fields if updating a user
     if (user) {
-        modalTitle.innerText = "Update User";
-        submitBtn.innerText = "Update User";
-
-        document.getElementById("firstName").value = user.firstName;
-        document.getElementById("lastName").value = user.lastName;
-        document.getElementById("email").value = user.email;
-        document.getElementById("contact").value = user.contact;
-        document.getElementById("address").value = user.address;
-        document.getElementById("gender").value = user.gender;
-        document.getElementById("dob").value = user.dob;
-        document.getElementById("role").value = user.role;
-        document.getElementById("username").value = user.username;
-        document.getElementById("password").value = user.password;
-        document.getElementById("confirmPassword").value = user.password;
-
-        document.getElementById("userForm").dataset.userId = user.userId;
-    } else {
-        modalTitle.innerText = "Add User";
-        submitBtn.innerText = "Add User";
-
-        document.getElementById("userForm").reset();
-        delete document.getElementById("userForm").dataset.userId;
+        form.dataset.userId = user._id;
+        const fields = ["firstName", "lastName", "email", "contact", "address", "gender", "dob", "role", "username"];
+        fields.forEach(field => {
+            const input = document.getElementById(field);
+            if (input) input.value = user[field] ?? '';
+        });
     }
 
+    // Show modal with fade-in effect
     modal.classList.remove("hidden");
-    setTimeout(() => document.getElementById("modal-content").classList.remove("opacity-0"), 50);
+    setTimeout(() => modalContent.classList.remove("opacity-0"), 50);
 }
 
+// Close the modal
 function closeModal() {
-    document.getElementById("userModal").classList.add("hidden");
+    const modal = document.getElementById("userModal");
+    const modalContent = document.getElementById("modal-content");
+
+    // Start closing animation
+    modalContent.classList.add("opacity-0");
+    modal.classList.remove("opacity-100", "scale-100");
+    modal.classList.add("opacity-0", "scale-95");
+
+    // Hide modal after animation
+    setTimeout(() => {
+        modal.classList.add("hidden");
+    }, 300);
 }
 
+// ================== USER ACTIONS ==================
+
+// Edit a user
+async function editUser(userId) {
+    try {
+        const res = await fetch(`/user/${userId}`);
+        if (!res.ok) throw new Error("Failed to fetch user");
+
+        const user = await res.json();
+        showUserModal(user);
+    } catch (err) {
+        console.error("Edit error:", err);
+    }
+}
+
+// Delete a user
+async function deleteUser(userId) {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+        const res = await fetch(`/delete/user/${userId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete user");
+
+        loadUserList();
+    } catch (err) {
+        console.error("Delete error:", err);
+    }
+}
+
+// Submit the user form
 function submitForm(event) {
     event.preventDefault();
 
@@ -98,24 +156,71 @@ function submitForm(event) {
     const formData = new FormData(form);
     const userId = form.dataset.userId;
 
+    if (!validateUserForm(formData)) return;
+
     const data = Object.fromEntries(formData);
     if (userId) data.userId = userId;
 
-    fetch(userId ? '/update-user' : '/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    toggleLoader(true);
+
+    fetch(userId ? "/update/user" : "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(() => {
-        closeModal();
-        fetchUserList();
-    })
-    .catch(error => console.error("Error:", error));
+        .then(res => res.json())
+        .then(() => {
+            closeModal();
+            loadUserList();
+            alert("User saved successfully!");
+        })
+        .catch(err => {
+            console.error("Save error:", err);
+            alert("Failed to save user.");
+        })
+        .finally(() => toggleLoader(false));
 }
 
-function updateElementText(elementId, text) {
-    const element = document.getElementById(elementId);
-    if (element) element.textContent = text;
-    else console.warn(`Element with ID '${elementId}' not found.`);
+// Validate user form
+function validateUserForm(data) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return false;
+    }
+    return true;
 }
+
+// ================== UTILITY FUNCTIONS ==================
+
+// Update text content of an element
+function updateText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+// Toggle loader visibility
+function toggleLoader(show) {
+    const loader = document.getElementById("loadingIndicator");
+    if (loader) loader.style.display = show ? "block" : "none";
+}
+
+// Close modal when clicking outside of the modal box
+document.getElementById("userModal").addEventListener("click", function (event) {
+    const modalBox = this.querySelector(".bg-white");
+    if (modalBox && !modalBox.contains(event.target)) {
+        closeModal();
+    }
+});
+
+// Close modal when clicking the close button (&times;)
+document.querySelector(".absolute.top-2.right-2").addEventListener("click", closeModal);
+
+// Close modal on pressing Escape key
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        closeModal();
+    }
+});

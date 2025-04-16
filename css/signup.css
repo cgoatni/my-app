@@ -1,0 +1,12 @@
+/* Tailwind for grid layout */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Ensures that items are stacked vertically on small screens */
+    gap: 1rem; /* Adjust spacing */
+}
+
+@media (min-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr 1fr; /* Two columns for larger screens */
+    }
+}

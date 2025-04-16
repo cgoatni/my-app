@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb'); // Import ObjectId here
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcryptjs');
 const path = require('path');
@@ -178,25 +178,62 @@ app.post('/api/validate-password', async (req, res) => {
 app.post('/register', async (req, res) => {
     const { lastName, firstName, email, contact, address, gender, dob, username, password } = req.body;
 
+    // Check for valid email format
     const emailLower = email.toLowerCase();
     const usernameLower = username.toLowerCase();
 
-    const existingUser = await db.collection('users').findOne({
-        $or: [{ email: emailLower }, { username: usernameLower }]
-    });
+    // Regex for basic email validation
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+    }
 
-    if (existingUser) return res.status(400).json({ error: "Email or username already registered" });
+    // Check for password length and complexity (for example, min 6 characters)
+    if (password.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const result = await db.collection('users').insertOne({
-        lastName, firstName, email: emailLower, contact, address, gender, dob,
-        username: usernameLower, password: hashedPassword, createdDate: new Date(), role: 'userOnly'
-    });
+    try {
+        // Check if user with same email or username already exists
+        const existingUser = await db.collection('users').findOne({
+            $or: [{ email: emailLower }, { username: usernameLower }]
+        });
 
-    if (!result.insertedId) return res.status(500).json({ error: "Registration failed" });
+        if (existingUser) {
+            return res.status(400).json({ error: "Email or username already registered" });
+        }
 
-    await sendWelcomeEmail(email);
-    res.status(200).json({ success: "Registration successful!" });
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Insert the new user
+        const result = await db.collection('users').insertOne({
+            lastName,
+            firstName,
+            email: emailLower,
+            contact,
+            address,
+            gender,
+            dob,
+            username: usernameLower,
+            password: hashedPassword,
+            createdDate: new Date(),
+            role: 'userOnly' // Default to 'userOnly' role
+        });
+
+        if (!result.insertedId) {
+            return res.status(500).json({ error: "Registration failed" });
+        }
+
+        // Send welcome email (make sure this is implemented)
+        await sendWelcomeEmail(email);
+
+        // Success response
+        res.status(200).json({ success: "Registration successful!" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
 // 7.2 Login
@@ -236,6 +273,88 @@ app.get('/users', async (req, res) => {
         const users = await db.collection('users').find().toArray();
         res.json(users);
     } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+app.get('/user/:id', async (req, res) => {
+    const userId = req.params.id;
+
+    // Check if ObjectId is valid
+    if (!ObjectId.isValid(userId)) {
+        return res.status(400).send({ error: 'Invalid User ID format' });
+    }
+
+    try {
+        const collection = db.collection('users');
+
+        // Query the database using findOne to fetch a single user by _id
+        const user = await collection.findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        // Send user data as JSON
+        res.json(user);
+    } catch (err) {
+        console.error('Error fetching user:', err);
+        res.status(500).send({ error: 'Internal Server Error' });
+    }
+});
+
+app.delete('/delete/user/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: "Invalid user ID" });
+        }
+
+        const result = await db.collection('users').deleteOne({ _id: new ObjectId(userId) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "User not found or already deleted" });
+        }
+
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+app.post('/update/user', async (req, res) => {
+    const { userId, password, ...updateFields } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+    }
+
+    try {
+        // Hash password if it's included in the update request
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10); // 10 is the salt rounds
+            updateFields.password = hashedPassword; // Replace password in updateFields with hashed password
+        }
+
+        const result = await db.collection('users').updateOne(
+            { _id: new ObjectId(userId) },
+            { $set: updateFields }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const updatedUser = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+
+        res.status(200).json({
+            message: "User updated successfully",
+            updatedUser
+        });
+    } catch (error) {
+        console.error("❌ Update Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
