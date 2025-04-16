@@ -29,7 +29,7 @@ async function fetchMenuData() {
             const desktopLi = document.createElement('li');
             const desktopA = document.createElement('a');
             desktopA.classList.add('text-white', 'transition');
-            desktopA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-400');
+            desktopA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-900');
             desktopA.href = item.path || '#';
             if (item.id) desktopA.id = item.id;
 
@@ -44,7 +44,7 @@ async function fetchMenuData() {
             const mobileLi = document.createElement('li');
             const mobileA = document.createElement('a');
             mobileA.classList.add('text-white', 'transition');
-            mobileA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-400');
+            mobileA.classList.add(isLogout ? 'hover:text-red-400' : 'hover:text-blue-900');
             mobileA.href = item.path || '#';
             if (item.id) mobileA.id = `${item.id}-mobile`;
 

@@ -178,62 +178,25 @@ app.post('/api/validate-password', async (req, res) => {
 app.post('/register', async (req, res) => {
     const { lastName, firstName, email, contact, address, gender, dob, username, password } = req.body;
 
-    // Check for valid email format
     const emailLower = email.toLowerCase();
     const usernameLower = username.toLowerCase();
 
-    // Regex for basic email validation
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-    }
+    const existingUser = await db.collection('users').findOne({
+        $or: [{ email: emailLower }, { username: usernameLower }]
+    });
 
-    // Check for password length and complexity (for example, min 6 characters)
-    if (password.length < 6) {
-        return res.status(400).json({ error: "Password must be at least 6 characters" });
-    }
+    if (existingUser) return res.status(400).json({ error: "Email or username already registered" });
 
-    try {
-        // Check if user with same email or username already exists
-        const existingUser = await db.collection('users').findOne({
-            $or: [{ email: emailLower }, { username: usernameLower }]
-        });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const result = await db.collection('users').insertOne({
+        lastName, firstName, email: emailLower, contact, address, gender, dob,
+        username: usernameLower, password: hashedPassword, createdDate: new Date(), role: 'userOnly'
+    });
 
-        if (existingUser) {
-            return res.status(400).json({ error: "Email or username already registered" });
-        }
+    if (!result.insertedId) return res.status(500).json({ error: "Registration failed" });
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert the new user
-        const result = await db.collection('users').insertOne({
-            lastName,
-            firstName,
-            email: emailLower,
-            contact,
-            address,
-            gender,
-            dob,
-            username: usernameLower,
-            password: hashedPassword,
-            createdDate: new Date(),
-            role: 'userOnly' // Default to 'userOnly' role
-        });
-
-        if (!result.insertedId) {
-            return res.status(500).json({ error: "Registration failed" });
-        }
-
-        // Send welcome email (make sure this is implemented)
-        await sendWelcomeEmail(email);
-
-        // Success response
-        res.status(200).json({ success: "Registration successful!" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Server error" });
-    }
+    await sendWelcomeEmail(email);
+    res.status(200).json({ success: "Registration successful!" });
 });
 
 // 7.2 Login

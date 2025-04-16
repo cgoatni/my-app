@@ -1,28 +1,28 @@
-const profilePictureInput = document.getElementById('settings-profile-picture');
-const profileImg = document.getElementById('profile-img');
+// const profilePictureInput = document.getElementById('settings-profile-picture');
+// const profileImg = document.getElementById('profile-img');
 
-// Profile picture preview logic
-profilePictureInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    const reader = new FileReader();
+// // Profile picture preview logic
+// profilePictureInput.addEventListener('change', function(e) {
+//     const file = e.target.files[0];
+//     const reader = new FileReader();
 
-    // Hide the image preview first
-    profileImg.classList.add('hidden');
+//     // Hide the image preview first
+//     profileImg.classList.add('hidden');
 
-    reader.onload = function(event) {
-        profileImg.src = event.target.result;
-        profileImg.classList.remove('hidden');
-    };
+//     reader.onload = function(event) {
+//         profileImg.src = event.target.result;
+//         profileImg.classList.remove('hidden');
+//     };
 
-    if (file) {
-        reader.readAsDataURL(file);
-    }
-});
+//     if (file) {
+//         reader.readAsDataURL(file);
+//     }
+// });
 
 // Validate the old password before updating
 async function validateOldPassword(oldPassword) {
     try {
-        const response = await fetch('/validate-password', {
+        const response = await fetch('/validatePassword', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ document.querySelector('form').addEventListener('submit', async function(event) 
 // Function to update the password (replace this with your actual API call)
 async function updatePassword(newPassword) {
     try {
-        const response = await fetch('/api/update-password', {
+        const response = await fetch('/updatePassword', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

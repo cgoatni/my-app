@@ -31,8 +31,7 @@ async function fetchUserData() {
                     window.location.href = "/dashboard";
                 });
             }
-        }
-               
+        }               
 
         // Populate settings form fields with user data
         const settingsElements = {
@@ -58,4 +57,80 @@ async function fetchUserData() {
         console.error("Error fetching user:", error);
         window.location.href = "/login"; // Redirect to login page if there's an error
     }
+}
+
+
+
+// ================== USER ACTIONS ==================
+
+// Edit a user
+async function editUser(userId) {
+    try {
+        const res = await fetch(`/user/${userId}`);
+        if (!res.ok) throw new Error("Failed to fetch user");
+
+        const user = await res.json();
+        showUserModal(user);
+    } catch (err) {
+        console.error("Edit error:", err);
+    }
+}
+
+// Delete a user
+async function deleteUser(userId) {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
+    try {
+        const res = await fetch(`/delete/user/${userId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete user");
+
+        loadUserList();
+    } catch (err) {
+        console.error("Delete error:", err);
+    }
+}
+
+// Submit the user form
+function submitForm(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("userForm");
+    const formData = new FormData(form);
+    const userId = form.dataset.userId;
+
+    if (!validateUserForm(formData)) return;
+
+    const data = Object.fromEntries(formData);
+    if (userId) data.userId = userId;
+
+    toggleLoader(true);
+
+    fetch(userId ? "/update/user" : "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+        .then(res => res.json())
+        .then(() => {
+            closeModal();
+            loadUserList();
+            alert("User saved successfully!");
+        })
+        .catch(err => {
+            console.error("Save error:", err);
+            alert("Failed to save user.");
+        })
+        .finally(() => toggleLoader(false));
+}
+
+// Validate user form
+function validateUserForm(data) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return false;
+    }
+    return true;
 }
