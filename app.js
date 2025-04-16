@@ -10,7 +10,7 @@ const http = require("http");
 const WebSocket = require('ws');
 const { sendWelcomeEmail, sendContactFormEmail } = require('./js/emailer');
 const multer = require('multer');
-const GridFSStorage = require('multer-gridfs-storage');
+const { GridFsStorage } = require('multer-gridfs-storage');
 
 const app = express();
 const server = http.createServer(app);
@@ -96,8 +96,8 @@ const serveFile = (route, folder, file) =>
 const getUserRole = (req) => req.session.user ? req.session.user.role : null;
 
 const ensureAdmin = (req, res, next) => {
-    const role = getUserRole(req); // Using the getUserRole function here
-    if (role.toLowerCase !== 'admin') return res.redirect('/home');
+    const role = getUserRole(req);
+    if (role?.toLowerCase() !== 'admin') return res.redirect('/home');
     next();
 };
 
@@ -231,10 +231,20 @@ app.post("/logout", (req, res) => {
 // ===================================================================
 // 9. PRODUCT ROUTES
 // ===================================================================
-const upload = multer({ storage: new GridFSStorage({
-    url: process.env.MONGO_URI,
-    file: (req, file) => ({ filename: `${Date.now()}-${file.originalname}`, bucketName: 'fs' })
-}) });
+// Configure GridFS storage
+const storage = new GridFsStorage({
+    url: process.env.MONGO_URI, // Use the MongoDB URI from environment variables
+    options: { useNewUrlParser: true, useUnifiedTopology: true }, // MongoDB connection options
+    file: (req, file) => {
+        return {
+            filename: `${Date.now()}-${file.originalname}`, // Generate a unique filename
+            bucketName: 'fs' // Specify the bucket name
+        };
+    }
+});
+
+// Initialize multer with GridFS storage
+const upload = multer({ storage });
 
 // 9.1 Get products
 app.get('/products', async (req, res) => {
@@ -245,9 +255,6 @@ app.get('/products', async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-// Import multer-gridfs-storage
-const multerGridFsStorage = require('multer-gridfs-storage');
-const GridFSStorage = multerGridFsStorage.default || multerGridFsStorage;
 
 // Example route for adding a product with image upload
 app.post('/add/product', upload.single('image'), async (req, res) => {
@@ -272,12 +279,7 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
             imageId: image,
         });
 
-        const newProduct = {
-            ...product.ops[0],
-            imageUrl: image ? `/uploads/${image}` : null,
-        };
-
-        res.status(201).json({ message: 'Product added successfully', product: newProduct });
+        res.status(201).json({ message: 'Product added successfully', productId: product.insertedId });
     } catch (error) {
         console.error('Error saving product:', error);
         res.status(500).json({ error: 'Internal Server Error' });
