@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showAlert(error, "red");
     }
 
+    // Form submission handler
     form.addEventListener("submit", (event) => {
         const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
@@ -30,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hideAlert(); // Hide alert if validation passes
     });
 
+    // Show alert with a specific message and color
     function showAlert(message, color) {
         const colors = {
             red: "bg-red-500",
@@ -40,25 +42,27 @@ document.addEventListener("DOMContentLoaded", () => {
         alertMessage.classList.remove("hidden");
     }
 
+    // Hide the alert message
     function hideAlert() {
         alertMessage.classList.add("hidden");
     }
 
+    // Validate email format
     function validateEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
 
-    // Clear alert when user types
+    // Clear alert when user types in the input fields
     [emailInput, passwordInput].forEach(input => {
         input.addEventListener("input", hideAlert);
     });
 });
 
-// Function to change icon based on input field content
+// Update the icon color based on input field content
 function updateIcon(field) {
-    var inputElement = document.getElementById(field);
-    var iconElement = document.getElementById(field + 'Icon');
+    const inputElement = document.getElementById(field);
+    const iconElement = document.getElementById(`${field}Icon`);
 
     if (inputElement.value.trim() !== "") {
         iconElement.classList.remove("text-gray-400");
