@@ -9,8 +9,6 @@ const session = require('express-session');
 const http = require("http");
 const WebSocket = require('ws');
 const { sendWelcomeEmail, sendContactFormEmail } = require('./js/emailer');
-const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage');
 
 const app = express();
 const server = http.createServer(app);
@@ -55,8 +53,6 @@ const connectDB = async () => {
     }
 };
 
-connectDB();
-
 // Ensure DB is ready
 app.use((req, res, next) => {
     if (!db) return res.status(503).json({ error: "Database connection is not ready" });
@@ -96,15 +92,15 @@ const serveFile = (route, folder, file) =>
 const getUserRole = (req) => req.session.user ? req.session.user.role : null;
 
 const ensureAdmin = (req, res, next) => {
-    const role = getUserRole(req);
-    if (role?.toLowerCase() !== 'admin') return res.redirect('/home');
+    if (req.session.user?.role !== 'Admin') return res.redirect('/home');
     next();
 };
-
 
 // ===================================================================
 // 5. HTML PAGES & STATIC FILES
 // ===================================================================
+
+// HTML Pages
 servePage('/', 'index.html');
 servePage('/signup', 'signup.html');
 servePage('/login', 'login.html');
@@ -129,6 +125,7 @@ app.get('/dashboard', ensureAdmin, (req, res) =>
 // ===================================================================
 // 6. API ROUTES
 // ===================================================================
+
 // 6.1 Get current user session
 app.get('/api/user', (req, res) => {
     if (!req.session.user) return res.redirect('/login');
@@ -176,6 +173,8 @@ app.post('/api/validate-password', async (req, res) => {
 // ===================================================================
 // 7. AUTH ROUTES
 // ===================================================================
+
+// 7.1 Register
 app.post('/register', async (req, res) => {
     const { lastName, firstName, email, contact, address, gender, dob, username, password } = req.body;
 
@@ -229,22 +228,34 @@ app.post("/logout", (req, res) => {
 });
 
 // ===================================================================
-// 9. PRODUCT ROUTES
+// 8. USER & MENU ROUTES
 // ===================================================================
-// Configure GridFS storage
-const storage = new GridFsStorage({
-    url: process.env.MONGO_URI, // Use the MongoDB URI from environment variables
-    options: { useNewUrlParser: true, useUnifiedTopology: true }, // MongoDB connection options
-    file: (req, file) => {
-        return {
-            filename: `${Date.now()}-${file.originalname}`, // Generate a unique filename
-            bucketName: 'fs' // Specify the bucket name
-        };
+// 8.1 Fetch all users (testing)
+app.get('/users', async (req, res) => {
+    try {
+        const users = await db.collection('users').find().toArray();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-// Initialize multer with GridFS storage
-const upload = multer({ storage });
+// 8.2 Fetch menu by role
+app.get('/menu', async (req, res) => {
+    const role = getUserRole(req);
+    if (!role) return res.status(403).json({ error: "User role not found or unauthorized" });
+
+    try {
+        const menuItems = await db.collection('menu').find({ role }).toArray();
+        res.json(menuItems);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// ===================================================================
+// 9. PRODUCT ROUTES (Testing)
+// ===================================================================
 
 // 9.1 Get products
 app.get('/products', async (req, res) => {
@@ -256,35 +267,48 @@ app.get('/products', async (req, res) => {
     }
 });
 
-// Example route for adding a product with image upload
-app.post('/add/product', upload.single('image'), async (req, res) => {
-    const { name, price, description, quantity, category } = req.body;
-    const image = req.file ? req.file.filename : null;
+// 9.2 Add new product
+app.post('/add/product', async (req, res) => {
+    const { name, description, price, image, quantity, category } = req.body;
 
-    if (!name || !price || !description || !quantity || !category) {
-        return res.status(400).json({ error: 'All fields except image are required' });
-    }
-
-    if (image && !req.file.mimetype.startsWith('image/')) {
-        return res.status(400).json({ error: 'Only image files are allowed' });
+    if (!name || !description || !price || !image || !quantity || !category) {
+        return res.status(400).json({ error: 'All fields are required' });
     }
 
     try {
-        const product = await db.collection('products').insertOne({
-            name,
-            price,
-            description,
-            quantity,
-            category,
-            imageId: image,
+        const result = await db.collection('products').insertOne({
+            name, description, price, image, quantity, category
         });
 
-        res.status(201).json({ message: 'Product added successfully', productId: product.insertedId });
+        if (result.insertedId) {
+            res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
+        } else {
+            res.status(500).json({ error: 'Failed to add product' });
+        }
     } catch (error) {
-        console.error('Error saving product:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.get('/image/:filename', (req, res) => {
+    const { filename } = req.params;
+    const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
+
+    const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
+
+    downloadStream.on('data', (chunk) => {
+        res.write(chunk);
+    });
+
+    downloadStream.on('end', () => {
+        res.end();
+    });
+
+    downloadStream.on('error', () => {
+        res.status(404).json({ error: 'Image not found' });
+    });
+});
+
 
 // ===================================================================
 // 10. CONTACT FORM
@@ -311,6 +335,6 @@ app.use((req, res) => {
 // ===================================================================
 // 12. START SERVER
 // ===================================================================
-server.listen(port, () => {
-    console.log(`🚀 Server running at http://localhost:${port}/`);
+connectDB().then(() => {
+    server.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}/`));
 });
