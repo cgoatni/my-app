@@ -245,37 +245,36 @@ app.get('/products', async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+// Import multer-gridfs-storage
+const multerGridFsStorage = require('multer-gridfs-storage');
+const GridFSStorage = multerGridFsStorage.default || multerGridFsStorage;
 
-// 9.2 Add product
+// Example route for adding a product with image upload
 app.post('/add/product', upload.single('image'), async (req, res) => {
     const { name, price, description, quantity, category } = req.body;
     const image = req.file ? req.file.filename : null;
 
-    // Check for required fields
     if (!name || !price || !description || !quantity || !category) {
         return res.status(400).json({ error: 'All fields except image are required' });
     }
 
-    // Image validation (optional)
     if (image && !req.file.mimetype.startsWith('image/')) {
         return res.status(400).json({ error: 'Only image files are allowed' });
     }
 
     try {
-        const collection = db.collection('products');
-        const product = await collection.insertOne({
+        const product = await db.collection('products').insertOne({
             name,
             price,
             description,
             quantity,
             category,
-            imageId: image, // Store the image filename
+            imageId: image,
         });
 
-        // Get the inserted product (including image URL)
         const newProduct = {
             ...product.ops[0],
-            imageUrl: image ? `/uploads/${image}` : null // Assuming images are served from /uploads/ folder
+            imageUrl: image ? `/uploads/${image}` : null,
         };
 
         res.status(201).json({ message: 'Product added successfully', product: newProduct });
@@ -284,7 +283,6 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 // ===================================================================
 // 10. CONTACT FORM
