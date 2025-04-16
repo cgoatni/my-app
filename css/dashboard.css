@@ -108,10 +108,12 @@ button:focus {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
-@media (max-width: 640px) {
+@media (max-width: 740px) {
   #userModal .bg-white {
     width: 100%; /* Full width on small screens */
-    margin: 0; /* Remove margin */
+    margin-top: 50%; /* Remove margin */
     padding: 16px; /* Adjust padding for better content fitting */
   }
 }
+
+
