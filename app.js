@@ -108,12 +108,13 @@ servePage('/home', 'home.html');
 servePage('/profile', 'profile.html');
 servePage('/settings', 'settings.html');
 servePage('/staff', 'staff.html');
+servePage('/counter', 'counter.html');
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );
 
 // Static JS files
-['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'settings'].forEach(file =>
+['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'counter', 'settings'].forEach(file =>
     serveFile(`/js/${file}.js`, 'js', `${file}.js`)
 );
 
@@ -362,34 +363,88 @@ app.post('/add/product', async (req, res) => {
             name, description, price, image, quantity, category
         });
 
+        console.log("Product added:", result);
+
         if (result.insertedId) {
             res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
         } else {
+            console.log("eeeee added:", result);
             res.status(500).json({ error: 'Failed to add product' });
         }
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+// 9.3 Update product
+app.put('/update/product/:id', async (req, res) => {
+    const productId = req.params.id;
+    const { name, description, price, image, quantity, category } = req.body;
 
-app.get('/image/:filename', (req, res) => {
-    const { filename } = req.params;
-    const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
+    // Validate that all fields are provided
+    if (!name || !description || !price || !quantity || !category) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
 
-    const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
+    try {
+        const result = await db.collection('products').updateOne(
+            { _id: new ObjectId(productId) }, // Find the product by ID
+            {
+                $set: {
+                    name,
+                    description,
+                    price,
+                    image,
+                    quantity,
+                    category
+                }
+            }
+        );
 
-    downloadStream.on('data', (chunk) => {
-        res.write(chunk);
-    });
-
-    downloadStream.on('end', () => {
-        res.end();
-    });
-
-    downloadStream.on('error', () => {
-        res.status(404).json({ error: 'Image not found' });
-    });
+        if (result.modifiedCount > 0) {
+            res.status(200).json({ message: 'Product updated successfully' });
+        } else {
+            res.status(404).json({ error: 'Product not found or no changes made' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
+
+// 9.4 Delete product
+app.delete('/delete/product/:id', async (req, res) => {
+    const productId = req.params.id;
+
+    try {
+        const result = await db.collection('products').deleteOne({ _id: new ObjectId(productId) });
+
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: 'Product deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Product not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// app.get('/image/:filename', (req, res) => {
+//     const { filename } = req.params;
+//     const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
+
+//     const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
+
+//     downloadStream.on('data', (chunk) => {
+//         res.write(chunk);
+//     });
+
+//     downloadStream.on('end', () => {
+//         res.end();
+//     });
+
+//     downloadStream.on('error', () => {
+//         res.status(404).json({ error: 'Image not found' });
+//     });
+// });
 
 
 // ===================================================================
