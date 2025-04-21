@@ -6,12 +6,12 @@
 }
 
 @media (max-width: 640px) {
-    #formContainer {
+    .max-w-2xl {
         max-height: 70vh;
         overflow-y: auto;
         scroll-behavior: smooth;
         padding: 1rem;
-        margin-top: 40%;
+        margin-top: 20%;
     }
 }
 
