@@ -70,7 +70,7 @@ wss.on("connection", (ws, req) => {
         if (req.session?.user) {
             const userEmail = req.session.user.email;
             activeUsers.add(userEmail);
-            console.log("WebSocket user connected:", userEmail);
+            // console.log("WebSocket user connected:", userEmail);
             ws.send(JSON.stringify({ message: "Welcome to the WebSocket server!" }));
 
             ws.on("close", () => {
