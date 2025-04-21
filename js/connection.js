@@ -1,7 +1,9 @@
 let isWebSocketActive = false;
 let userDataInterval = setInterval(fetchUserData, 5000);
 
-const socket = new WebSocket(`ws://${window.location.host}`);
+// Change the WebSocket URL to use wss:// if the page is served over HTTPS
+const socketProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const socket = new WebSocket(`${socketProtocol}${window.location.host}`);
 
 socket.addEventListener("message", async () => {
     await fetchUserData();
