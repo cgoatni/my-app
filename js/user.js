@@ -19,7 +19,6 @@ async function fetchUserData() {
         if (fullNameElement) {
             fullNameElement.textContent = user.lastName + " " + user.firstName || "Guest";
         }
-        console.log("User data:", user.role.toLowerCase()); // Debugging line to check the response    
 
         if (user.role && user.role.toLowerCase() === "admin") {
             const dashboardLink = document.getElementById("dashboard-link");
