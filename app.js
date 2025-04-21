@@ -123,6 +123,9 @@ app.get('/dashboard', ensureAdmin, (req, res) =>
     serveFile(`/css/${file}.css`, 'css', `${file}.css`)
 );
 
+// Serve image files from /img
+app.use('/img', express.static(path.join(__dirname, 'img')));
+
 // ===================================================================
 // 6. API ROUTES
 // ===================================================================
