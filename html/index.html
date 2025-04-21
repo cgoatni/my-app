@@ -63,6 +63,7 @@
         </nav>
     </header>
 
+    <!-- About -->
     <section id="about" class="bg-gray-200 py-24 text-center flex items-center justify-center h-screen fade-in-section">
         <div class="max-w-3xl">
             <h1 class="text-5xl font-bold text-gray-800 mb-6">Sample Only</h1>
@@ -73,77 +74,122 @@
 
     <section id="features" class="py-24 text-center bg-gray-50 fade-in-section">
         <h2 class="text-4xl font-bold text-gray-800 mb-12">Our Features</h2>
-        <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-12">
-            <div class="bg-white p-8 rounded-lg shadow-lg">
-                <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 1</h3>
-                <p class="text-gray-600">Details about feature 1</p>
+      
+        <div class="max-w-6xl mx-auto grid gap-12 px-6 md:grid-cols-3">
+          <!-- Feature Card 1 -->
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+            <div class="text-blue-500 text-5xl mb-4">
+              <!-- Optional Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
             </div>
-            <div class="bg-white p-8 rounded-lg shadow-lg">
-                <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 2</h3>
-                <p class="text-gray-600">Details about feature 2</p>
+            <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 1</h3>
+            <p class="text-gray-600">Details about feature 1 that help users understand its value and benefits.</p>
+          </div>
+      
+          <!-- Feature Card 2 -->
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+            <div class="text-blue-500 text-5xl mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
             </div>
-            <div class="bg-white p-8 rounded-lg shadow-lg">
-                <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 3</h3>
-                <p class="text-gray-600">Details about feature 3</p>
+            <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 2</h3>
+            <p class="text-gray-600">Details about feature 2 with brief explanation to grab user attention.</p>
+          </div>
+      
+          <!-- Feature Card 3 -->
+          <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+            <div class="text-blue-500 text-5xl mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-4h6v4h5v-6h3L12 3 1 11h3v6z" />
+              </svg>
             </div>
+            <h3 class="text-2xl font-semibold text-blue-500 mb-4">Feature 3</h3>
+            <p class="text-gray-600">Details about feature 3 to describe functionality or uniqueness.</p>
+          </div>
         </div>
     </section>
-
+      
     <!-- Contact Form Section -->
     <section id="contact" class="bg-gray-200 py-24 text-center fade-in-section">
         <h2 class="text-4xl font-bold text-gray-800 mb-12">Contact Us</h2>
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-            <!-- Contact Form -->
-            <div class="bg-white p-8 rounded-lg shadow-lg">
-                <form action="/submit-contact" method="POST" class="space-y-6" id="contact-form">
-                    <!-- Full Name -->
-                    <div class="relative mb-6">
-                        <label for="name" class="block text-left text-sm font-medium text-gray-600">Full Name</label>
-                        <div class="relative">
-                            <input type="text" id="name" name="name" class="w-full mt-2 p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" placeholder="Your Full Name" required>
-                            <i class="fa-solid fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-                    </div>
-                    <!-- Email -->
-                    <div class="relative mb-6">
-                        <label for="email" class="block text-left text-sm font-medium text-gray-600">Email Address</label>
-                        <div class="relative">
-                            <input type="email" id="email" name="email" class="w-full mt-2 p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" placeholder="you@example.com" required>
-                            <i class="fa-solid fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-                    </div>
-                    <!-- Message -->
-                    <div class="relative mb-6">
-                        <label for="message" class="block text-left text-sm font-medium text-gray-600">Your Message</label>
-                        <div class="relative">
-                            <textarea id="message" name="message" rows="6" class="w-full mt-2 p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" placeholder="Write your message here..." required></textarea>
-                            <i class="fa-solid fa-comment-alt absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
-                    </div>
-                    <!-- Submit Button -->
-                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-500 transition ease-in-out duration-200 hover-button">Send Message</button>
-
-                    <!-- Modal -->
-                    <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-                        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
-                            <button id="modalClose" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl">&times;</button>
-                            <p id="modalMessage" class="text-lg text-center font-medium">Form submission message here...</p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Map Section -->
-            <div class="relative mb-8">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387190.2799083187!2d-74.2598774!3d40.6976701!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a2787d6d23f%3A0x1bdb07b5fdd54cc9!2sNew%20York!5e0!3m2!1sen!2sus!4v1643366345156!5m2!1sen!2sus" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-                <!-- Address Section (Directly Below Map) -->
-                <div class="text-center mt-16">
-                    <p class="text-xl text-gray-600">Our Office Address:</p>
-                    <p class="text-lg text-gray-800 font-semibold">123 Main Street, New York, NY 10001</p>
+    
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 px-6">
+        <!-- Contact Form -->
+        <div class="bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+            <form action="/submit-contact" method="POST" class="space-y-6" id="contact-form">
+            <!-- Full Name -->
+            <div class="relative">
+                <label for="name" class="block text-left text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                <div class="relative group">
+                <input type="text" id="name" name="name"
+                    class="w-full p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 hover:border-blue-400 transition duration-200"
+                    placeholder="Your Full Name" required>
+                <i
+                    class="fa-solid fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition duration-200"></i>
                 </div>
             </div>
+    
+            <!-- Email -->
+            <div class="relative">
+                <label for="email" class="block text-left text-sm font-medium text-gray-600 mb-1">Email Address</label>
+                <div class="relative group">
+                <input type="email" id="email" name="email"
+                    class="w-full p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 hover:border-blue-400 transition duration-200"
+                    placeholder="you@example.com" required>
+                <i
+                    class="fa-solid fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition duration-200"></i>
+                </div>
+            </div>
+    
+            <!-- Message -->
+            <div class="relative">
+                <label for="message" class="block text-left text-sm font-medium text-gray-600 mb-1">Your Message</label>
+                <div class="relative group">
+                <textarea id="message" name="message" rows="6"
+                    class="w-full p-4 pl-12 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 hover:border-blue-400 transition duration-200"
+                    placeholder="Write your message here..." required></textarea>
+                <i
+                    class="fa-solid fa-comment-alt absolute left-4 top-6 text-gray-400 group-hover:text-blue-500 transition duration-200"></i>
+                </div>
+            </div>
+    
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-500 hover:shadow-md transition ease-in-out duration-200">
+                Send Message
+            </button>
+    
+            <!-- Modal -->
+            <div id="modal"
+                class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+                <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full relative">
+                <button id="modalClose" type="button"
+                    class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-2xl">&times;</button>
+                <p id="modalMessage" class="text-lg text-center font-medium">Form submission message here...</p>
+                </div>
+            </div>
+            </form>
+        </div>
+    
+        <!-- Map Section -->
+        <div class="relative group overflow-hidden rounded-2xl shadow-md hover:shadow-lg transition duration-300">
+            <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387190.2799083187!2d-74.2598774!3d40.6976701!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a2787d6d23f%3A0x1bdb07b5fdd54cc9!2sNew%20York!5e0!3m2!1sen!2sus!4v1643366345156!5m2!1sen!2sus"
+            width="100%" height="400" class="transition-transform duration-300 group-hover:scale-105"
+            style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    
+            <!-- Address Section -->
+            <div class="text-center mt-10">
+            <p class="text-xl text-gray-600">Our Office Address:</p>
+            <p class="text-lg text-gray-800 font-semibold">123 Main Street, New York, NY 10001</p>
+            </div>
+        </div>
         </div>
     </section>
+  
 
     <footer class="bg-gray-800 text-white py-6 text-center">
         <p>&copy; 2025 Our Company. All rights reserved.</p>
