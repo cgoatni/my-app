@@ -17,7 +17,7 @@ async function fetchUserData() {
         // Update full name display
         const fullNameElement = document.getElementById("fullName");
         if (fullNameElement) {
-            fullNameElement.textContent = user.lastName + " " + user.firstName || "Guest";
+            fullNameElement.textContent = user.firstName + " " + user.lastName || "Guest";
         }
 
         if (user.role && user.role.toLowerCase() === "admin") {
