@@ -94,7 +94,7 @@ const serveFile = (route, folder, file) =>
 const getUserRole = (req) => req.session.user ? req.session.user.role : null;
 
 const ensureAdmin = (req, res, next) => {
-    if (req.session.user?.role !== 'Admin') return res.redirect('/home');
+    if (req.session.user?.role.toLowerCase() !== 'admin') return res.redirect('/home');
     next();
 };
 
@@ -215,38 +215,32 @@ app.post('/login', async (req, res) => {
         return res.redirect('/login?error=Invalid credentials');
     }
 
-    // Log the login event
     const loginTime = new Date();
-    const result = await db.collection('logs').insertOne({
-        userId: user._id,
-        email: user.email,
-        loginTime,
-        logoutTime: null,
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent'),
-        success: true
-    });
+    const isAdmin = user.role.toLowerCase() === 'admin';
+    let loginLogId = null;
 
-    // Store user info + loginLogId in session
-    req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, role }) => ({
-        lastName,
-        firstName,
-        email,
-        contact,
-        address,
-        gender,
-        dob,
-        username,
-        role,
-        loginLogId: result.insertedId, // Add this for tracking logout
-        loginTime
-    }))(user);
+    if (!isAdmin) {
+        const result = await db.collection('logs').insertOne({
+            userId: user._id,
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            loginTime,
+            logoutTime: null,
+            ipAddress: req.ip,
+            userAgent: req.get('User-Agent'),
+            success: true
+        });
+        loginLogId = result.insertedId;
+    }
 
-    // Redirect based on role
-    const redirectPath = user.role === 'Admin' ? '/dashboard' :
-                         user.role === 'staff' ? '/staff' : '/home';
+    req.session.user = {
+        ...((({ lastName, firstName, email, contact, address, gender, dob, username, role }) => ({
+            lastName, firstName, email, contact, address, gender, dob, username, role
+        }))(user)),
+        ...(loginLogId && { loginLogId, loginTime })
+    };
 
-    res.redirect(redirectPath);
+    res.redirect(isAdmin ? '/dashboard' : user.role === 'staff' ? '/staff' : '/home');
 });
 
 // 7.3 Logout
@@ -256,13 +250,14 @@ app.post("/logout", async (req, res) => {
     const { loginLogId, email } = req.session.user;
 
     try {
-        await db.collection('logs').updateOne(
-            { _id: new ObjectId(loginLogId) },
-            { $set: { logoutTime: new Date() } }
-        );
+        if (loginLogId) {
+            await db.collection('logs').updateOne(
+                { _id: new ObjectId(loginLogId) },
+                { $set: { logoutTime: new Date() } }
+            );
+        }
 
         activeUsers.delete(email);
-
         req.session.destroy(err => {
             if (err) return res.status(500).json({ error: "Logout failed" });
             res.clearCookie('connect.sid');
@@ -273,7 +268,6 @@ app.post("/logout", async (req, res) => {
         res.status(500).send("Logout error");
     }
 });
-
 
 // ===================================================================
 // 8. USER & MENU ROUTES
@@ -389,20 +383,21 @@ app.get('/menu', async (req, res) => {
 //=====================================================================
 app.get('/logs', async (req, res) => {
     try {
-        if (!req.session.user) {
-            return res.status(401).json({ error: "Unauthorized" });
+        // If the current user is an admin
+        if (req.session.user.role.toLowerCase() === 'admin') {
+            // Fetch all user logs
+            const logs = await db.collection('logs').find({}).toArray(); 
+            res.json(logs);
+        } else {
+            // Fetch only the logs for the current user
+            const userEmail = req.session.user.email;
+            const logs = await db.collection('logs').find({ email: userEmail }).toArray();
+            res.json(logs);
         }
-
-        const userEmail = req.session.user.email;
-        const logs = await db.collection('logs').find({ email: userEmail }).toArray();
-
-        res.json(logs);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching logs." });
     }
 });
-
-
 
 // ===================================================================
 // 9. PRODUCT ROUTES (Testing)

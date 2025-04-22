@@ -86,7 +86,7 @@ function createProductCard(product) {
     quantity.classList.add("text-sm", "font-semibold", "text-gray-800");
     quantity.textContent = `Qty: ${product.quantity}`;
 
-    // Category and Delete Button Section
+    // Category and Button Section
     const catAndbtn = document.createElement("div");
     catAndbtn.classList.add("flex", "justify-between", "items-center", "mt-2");
 
@@ -94,45 +94,66 @@ function createProductCard(product) {
     category.classList.add("text-sm", "text-gray-500");
     category.textContent = product.category;
 
-    // Delete Button
-    const deleteButton = document.createElement("button");
-    deleteButton.classList.add("text-red-500", "bg-white", "hover:bg-red-100", "border", "border-red-500", "rounded", "px-3", "py-1", "text-xs");
-    deleteButton.textContent = "Delete";
+    // Button (Delete or Add to Cart based on URL)
+    const actionButton = document.createElement("button");
+    actionButton.classList.add("bg-white", "border", "rounded", "px-3", "py-1", "text-xs");
 
-    // Delete Button Event Listener (Staff URL for deleting)
-    deleteButton.addEventListener("click", (event) => {
-        event.stopPropagation(); // Prevent the card click event
-    
-        if (!product._id) {
-            alert("Product ID is missing.");
-            return;
-        }
-    
-        // Construct the delete URL using _id or $oid
-        const productId = product._id.$oid || product._id; // Check if _id is in { "$oid": "someId" } format
-        const deleteUrl = `/delete/product/${productId}`;
+    // Default button text and color (Red)
+    actionButton.textContent = "Delete";
+    actionButton.classList.add("text-red-500", "border-red-500", "hover:bg-red-100");
 
-        // Call delete function (replace with actual URL for deletion)
-        fetch(deleteUrl, { method: "DELETE" })
-            .then(response => {
-                if (response.ok) {
-                    card.remove(); // Remove the card from UI
-                    alert("Product deleted successfully!");
-                } else {
-                    response.json().then(data => alert(data.error || "Failed to delete product."));
-                }
-            })
-            .catch(error => {
-                alert("An error occurred while deleting the product.");
-            });
-    });
+
+    if (window.location.pathname.includes("counter")) {
+        actionButton.textContent = "Add to Cart";
+        actionButton.classList.replace("text-red-500", "text-green-500");
+        actionButton.classList.replace("border-red-500", "border-green-500");
+        actionButton.classList.replace("hover:bg-red-100", "hover:bg-green-100");
+
+        // Add to Cart Event Listener
+        actionButton.addEventListener("click", (event) => {
+            event.stopPropagation(); // Prevent the card click event
+
+            // Call function to add the product to the cart
+            addToCart(product);
+        });
+    } else {
+        actionButton.textContent = "Delete";
+
+        // Delete Button Event Listener
+        actionButton.addEventListener("click", (event) => {
+            event.stopPropagation(); // Prevent the card click event
+
+            if (!product._id) {
+                alert("Product ID is missing.");
+                return;
+            }
+
+            // Construct the delete URL using _id or $oid
+            const productId = product._id.$oid || product._id; // Check if _id is in { "$oid": "someId" } format
+            const deleteUrl = `/delete/product/${productId}`;
+
+            // Call delete function (replace with actual URL for deletion)
+            fetch(deleteUrl, { method: "DELETE" })
+                .then(response => {
+                    if (response.ok) {
+                        card.remove(); // Remove the card from UI
+                        alert("Product deleted successfully!");
+                    } else {
+                        response.json().then(data => alert(data.error || "Failed to delete product."));
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while deleting the product.");
+                });
+        });
+    }
 
     // Appending elements to their respective containers
     priceAndQuantity.append(price, quantity);
     productDetails.append(productName, priceAndQuantity);
-    catAndbtn.append(category, deleteButton);
+    catAndbtn.append(category, actionButton);
     productDetails.append(catAndbtn);
-    
+
     // Append all to the card
     card.append(productImage, productDetails);
 
