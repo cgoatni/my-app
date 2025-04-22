@@ -8,6 +8,7 @@ const path = require('path');
 const session = require('express-session');
 const http = require("http");
 const WebSocket = require('ws');
+const multer = require('multer');
 const { sendWelcomeEmail, sendContactFormEmail } = require('./js/emailer');
 
 const app = express();
@@ -119,7 +120,7 @@ app.get('/dashboard', ensureAdmin, (req, res) =>
 );
 
 // Static CSS files
-['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings'].forEach(file =>
+['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe'].forEach(file =>
     serveFile(`/css/${file}.css`, 'css', `${file}.css`)
 );
 
@@ -353,31 +354,40 @@ app.get('/products', async (req, res) => {
     }
 });
 
-// 9.2 Add new product
-app.post('/add/product', async (req, res) => {
-    const { name, description, price, image, quantity, category } = req.body;
+// Setup where to store images
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'img'),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
+});
 
-    if (!name || !description || !price || !image || !quantity || !category) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
+const upload = multer({ storage });
+
+// 9.2 Add product
+app.post('/add/product', upload.single('image'), async (req, res) => {
+    const { name, description, price, quantity, category } = req.body;
+    const image = req.file?.filename;
+
+    // if (!name || !description || !price || !image || !quantity || !category) {
+    //     return res.status(400).json({ error: 'All fields are required' });
+    // }
 
     try {
         const result = await db.collection('products').insertOne({
-            name, description, price, image, quantity, category
+            name,
+            description,
+            price,
+            image,
+            quantity,
+            category
         });
 
-        console.log("Product added:", result);
-
-        if (result.insertedId) {
-            res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
-        } else {
-            console.log("eeeee added:", result);
-            res.status(500).json({ error: 'Failed to add product' });
-        }
+        res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
 // 9.3 Update product
 app.put('/update/product/:id', async (req, res) => {
     const productId = req.params.id;

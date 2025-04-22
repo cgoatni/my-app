@@ -1,17 +1,4 @@
-/* Tailwind for grid layout */
-.grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Ensures that items are stacked vertically on small screens */
-    gap: 1rem; /* Adjust spacing */
-}
-
-@media (max-width: 640px) {
-    .max-w-2xl {
-        max-height: 70vh;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        padding: 1rem;
-        /* margin-top: 10%; */
-    }
-}
+body {
+    font-family: 'Inter', sans-serif;
+  }
 

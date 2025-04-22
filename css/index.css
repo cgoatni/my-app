@@ -2,6 +2,10 @@ html {
     scroll-behavior: smooth;
 }
 
+body {
+    font-family: 'Inter', sans-serif;
+}
+
 .underline-hover {
     position: relative;
     display: inline-block; /* Ensures the element takes up only as much space as the content */
@@ -24,16 +28,6 @@ html {
     width: 100%; /* Expand the width */
     left: 50%; /* Keep it centered */
     transform: translateX(-50%) scaleX(1); /* Scale the underline from the center to both sides */
-}
-
-/* Custom animation for fade-in effect */
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
 }
 
 /* Apply fade-in effect to the body */
