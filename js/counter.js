@@ -26,7 +26,7 @@ function updateCart() {
     const totalPriceElement = document.getElementById("total-price");
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    cartItemsContainer.innerHTML = '';
+    cartItemsContainer.innerHTML = '';  // Clear current cart items
     let total = 0;
 
     cart.forEach(item => {
@@ -39,6 +39,7 @@ function updateCart() {
         cartItem.innerHTML = `
             <span>${item.name} (x${item.quantity})</span>
             <span>₱${formatNumberWithCommas(itemTotal)}</span>
+            <button class="remove-item bg-red-500 text-white py-1 px-2 rounded-lg hover:bg-red-600" data-id="${item._id}">Remove</button>
         `;
 
         cartItemsContainer.appendChild(cartItem);
@@ -46,6 +47,25 @@ function updateCart() {
 
     totalPriceElement.textContent = `₱${formatNumberWithCommas(total)}`;
 }
+
+// ---------- Remove item from cart ----------
+function removeItemFromCart(itemId) {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const updatedCart = cart.filter(item => item._id !== itemId);  // Filter out the item to be removed
+    localStorage.setItem("cart", JSON.stringify(updatedCart));  // Update the cart in local storage
+    updateCart();  // Re-render the cart with updated items
+}
+
+// ---------- Event listener for remove buttons ----------
+document.addEventListener("DOMContentLoaded", () => {
+    // Event delegation for remove buttons
+    document.getElementById("cart-items").addEventListener("click", function (event) {
+        if (event.target && event.target.classList.contains("remove-item")) {
+            const itemId = event.target.getAttribute("data-id");
+            removeItemFromCart(itemId);
+        }
+    });
+});
 
 // ---------- Show payment modal ----------
 function showPaymentModal() {
