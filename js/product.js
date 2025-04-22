@@ -3,27 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================== PRODUCT FUNCTIONS ==================
-
-// Preview product image before uploading
-function previewProductImage(event) {
-    const file = event.target.files[0];
-    const preview = document.getElementById("product-img");
-    const errorMessage = document.getElementById("product-error-message");
-
-    if (file && file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            preview.src = e.target.result;
-            preview.classList.remove("hidden");
-            errorMessage.classList.add("hidden");
-        };
-        reader.readAsDataURL(file);
-    } else {
-        preview.classList.add("hidden");
-        errorMessage.classList.remove("hidden");
-    }
-}
-
 // Fetch products from the server
 async function fetchProducts(category = "") {
     const productCardsContainer = document.getElementById("product-cards");
@@ -53,37 +32,6 @@ async function fetchProducts(category = "") {
         productCardsContainer.innerHTML = "<p class='text-center text-red-500'>Failed to load products.</p>";
     }
 }
-
-document.getElementById("add-product-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form); // This includes all inputs and the file
-
-    try {
-        const response = await fetch('/add/product', {
-            method: 'POST',
-            body: formData, // Automatically sets 'multipart/form-data'
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("Product added successfully!");
-            form.reset(); // Optional: clear the form after submission
-            document.getElementById("product-img").classList.add("hidden"); // Hide preview if needed
-        } else {
-            alert(result.error || "Something went wrong.");
-        }
-    } catch (err) {
-        console.error("Error submitting form:", err);
-    }
-});
-
-// Open the modal when the 'Add Product' button is clicked
-document.getElementById("add-product-btn").addEventListener("click", function () {
-    showAddProductModal();
-});
 
 // Display products in the UI
 function displayProducts(products) {
@@ -128,7 +76,6 @@ function createProductCard(product) {
     card.addEventListener("click", () => showModal(product));
     return card;
 }
-
 
 // Show product details in a modal with fade-in effect
 function showModal(product) {

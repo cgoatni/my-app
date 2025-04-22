@@ -345,14 +345,18 @@ app.get('/menu', async (req, res) => {
 // ===================================================================
 
 // 9.1 Get products
-app.get('/products', async (req, res) => {
-    try {
-        const products = await db.collection('products').find().toArray();
-        res.json(products);
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+app.get('/products', (req, res) => {
+    const { category } = req.query;
+  
+    if (category) {
+      const filtered = products.filter(
+        (product) => product.category.toLowerCase() === category.toLowerCase()
+      );
+      return res.json(filtered);
     }
-});
+  
+    res.json(products); // return all if no category
+  });
 
 // Setup where to store images
 const storage = multer.diskStorage({
