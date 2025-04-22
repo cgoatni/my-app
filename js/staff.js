@@ -37,6 +37,8 @@ document.getElementById("add-product-form").addEventListener("submit", async (e)
             alert("Product added successfully!");
             form.reset(); // Optional: clear the form after submission
             document.getElementById("product-img").classList.add("hidden"); // Hide preview if needed
+
+            location.reload(); // This will refresh the page
         } else {
             alert(result.error || "Something went wrong.");
         }

@@ -10,33 +10,33 @@
   <link rel="stylesheet" href="/css/keyframe.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-100 font-inter">
+<body class="bg-gray-100 font-inter min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="bg-[#030328] py-6 sticky top-0 z-20 shadow-lg fade-in">
+  <!-- Header -->
+  <header class="bg-[#030328] py-6 sticky top-0 z-20 shadow-lg fade-in">
     <div class="mx-auto flex justify-between items-center px-6 py-4">
       <div class="mb-2 md:mb-0">
         <h1 id="dashboard-link" class="text-2xl font-semibold cursor-pointer text-white">Sales Dashboard</h1>
         <p class="text-sm text-white">Welcome, <span id="fullName">Loading...</span>!</p>
       </div>
 
-        <!-- Desktop Menu -->
-        <nav class="hidden md:block">
-            <ul id="menu-items" class="flex items-center gap-6">
-                <!-- Menu items will be dynamically inserted here -->
-            </ul>
-        </nav>
+      <!-- Desktop Menu -->
+      <nav class="hidden md:block">
+        <ul id="menu-items" class="flex items-center gap-6">
+          <!-- Menu items will be dynamically inserted here -->
+        </ul>
+      </nav>
 
-        <!-- Mobile Menu (Hidden by default) -->
-        <nav class="md:hidden flex items-center gap-6">
-            <ul id="mobile-menu-items" class="flex items-center gap-6">
-                <!-- Mobile menu items will be inserted here as icons only -->
-            </ul>
-        </nav>
+      <!-- Mobile Menu (Hidden by default) -->
+      <nav class="md:hidden flex items-center gap-6">
+        <ul id="mobile-menu-items" class="flex items-center gap-6">
+          <!-- Mobile menu items will be inserted here as icons only -->
+        </ul>
+      </nav>
     </div>
   </header>
 
-  <main class="p-6 space-y-6 w-full">
+  <main class="flex-1 p-6 space-y-6 w-full">
     <section class="bg-white px-6 py-4 rounded-lg shadow-md w-full">
       <h3 class="text-lg font-semibold text-gray-700 mb-3">Category Filter</h3>
       <div class="w-full">
@@ -54,35 +54,39 @@
     </section>
 
     <div class="flex flex-col md:flex-row gap-6">
-        <!-- Product List (Left) -->
-        <div class="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-xl font-semibold mb-4">Products</h2>
-          <div id="product-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Dynamic product cards will be injected here -->
-          </div>
-        </div>
-    
-        <!-- Computation Area (Right) -->
-        <div class="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-xl font-semibold mb-4">Receipt</h2>
-          <div id="cart-items" class="space-y-3">
-            <!-- Cart items will be listed here -->
-          </div>
-          <hr class="my-4">
-          <div class="text-lg font-semibold">
-            Total: ₱<span id="total-price">0</span>
-          </div>
+      <!-- Product List (Left) -->
+      <div class="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-md max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <h2 class="text-xl font-semibold mb-4">Products</h2>
+        <div id="product-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Dynamic product cards will be injected here -->
         </div>
       </div>
+    
+      <!-- Computation Area (Right) -->
+      <div class="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-md max-h-[30vh]">
+        <h2 class="text-xl font-semibold mb-4">Receipt</h2>
+        <div id="cart-items" class="space-y-3">
+          <!-- Cart items will be listed here -->
+        </div>
+        <hr class="my-4">
+        <div class="text-lg font-semibold">
+          Total: ₱<span id="total-price">0</span>
+        </div>
+      </div>
+    </div>    
   </main>
 
   <!-- Modal -->
   <div id="product-modal" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden flex justify-center items-center transition-opacity duration-300 ease-in-out opacity-0 transform scale-95">
     <div class="modal-box bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4 transform transition-transform duration-300 ease-in-out scale-95">
-        <div id="modal-content"></div>
+      <div id="modal-content"></div>
     </div>
   </div>
-  
+
+  <footer class="bg-[#030328] text-white py-4 text-center">
+    <p>&copy; 2025 Sample Inc. All rights reserved.</p>
+  </footer>
+
   <script src="/js/user.js"></script>
   <script src="/js/menu.js"></script>
   <script src="/js/product.js"></script> 

@@ -33,6 +33,7 @@ const sessionMiddleware = session({
     }),
     cookie: { secure: false }
 });
+
 app.use(sessionMiddleware);
 
 // ===================================================================
@@ -110,17 +111,18 @@ servePage('/profile', 'profile.html');
 servePage('/settings', 'settings.html');
 servePage('/staff', 'staff.html');
 servePage('/counter', 'counter.html');
+servePage('/employee', 'employee.html');
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );
 
 // Static JS files
-['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'counter', 'settings'].forEach(file =>
+['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'counter', 'settings', 'employee'].forEach(file =>
     serveFile(`/js/${file}.js`, 'js', `${file}.js`)
 );
 
 // Static CSS files
-['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe'].forEach(file =>
+['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe', 'employee'].forEach(file =>
     serveFile(`/css/${file}.css`, 'css', `${file}.css`)
 );
 
@@ -213,9 +215,34 @@ app.post('/login', async (req, res) => {
         return res.redirect('/login?error=Invalid credentials');
     }
 
-    req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, role }) =>
-        ({ lastName, firstName, email, contact, address, gender, dob, username, role }))(user);
+    // Log the login event
+    const loginTime = new Date();
+    const result = await db.collection('logs').insertOne({
+        userId: user._id,
+        email: user.email,
+        loginTime,
+        logoutTime: null,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        success: true
+    });
 
+    // Store user info + loginLogId in session
+    req.session.user = (({ lastName, firstName, email, contact, address, gender, dob, username, role }) => ({
+        lastName,
+        firstName,
+        email,
+        contact,
+        address,
+        gender,
+        dob,
+        username,
+        role,
+        loginLogId: result.insertedId, // Add this for tracking logout
+        loginTime
+    }))(user);
+
+    // Redirect based on role
     const redirectPath = user.role === 'Admin' ? '/dashboard' :
                          user.role === 'staff' ? '/staff' : '/home';
 
@@ -223,14 +250,30 @@ app.post('/login', async (req, res) => {
 });
 
 // 7.3 Logout
-app.post("/logout", (req, res) => {
-    if (req.session.user) activeUsers.delete(req.session.user.email);
-    req.session.destroy(err => {
-        if (err) return res.status(500).json({ error: "Logout failed" });
-        res.clearCookie('connect.sid');
-        res.redirect('/login');
-    });
+app.post("/logout", async (req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    const { loginLogId, email } = req.session.user;
+
+    try {
+        await db.collection('logs').updateOne(
+            { _id: new ObjectId(loginLogId) },
+            { $set: { logoutTime: new Date() } }
+        );
+
+        activeUsers.delete(email);
+
+        req.session.destroy(err => {
+            if (err) return res.status(500).json({ error: "Logout failed" });
+            res.clearCookie('connect.sid');
+            res.redirect('/login');
+        });
+    } catch (err) {
+        console.error("Logout logging failed:", err);
+        res.status(500).send("Logout error");
+    }
 });
+
 
 // ===================================================================
 // 8. USER & MENU ROUTES
@@ -339,6 +382,27 @@ app.get('/menu', async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+//=====================================================================
+//Employee routes
+//=====================================================================
+app.get('/logs', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const userEmail = req.session.user.email;
+        const logs = await db.collection('logs').find({ email: userEmail }).toArray();
+
+        res.json(logs);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
 
 // ===================================================================
 // 9. PRODUCT ROUTES (Testing)

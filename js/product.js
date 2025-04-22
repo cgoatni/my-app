@@ -61,21 +61,45 @@ function createProductCard(product) {
     const card = document.createElement("div");
     card.classList.add("bg-white", "p-4", "rounded-lg", "shadow-md", "cursor-pointer");
 
-    card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" class="w-full h-40 object-cover rounded-md" />
-        <div class="mt-4">
-            <h3 class="font-semibold text-lg text-gray-700">${product.name}</h3>
-            <div class="flex justify-between items-center">
-                <p class="text-sm text-gray-500">₱${product.price}</p>
-                <p class="text-sm font-semibold text-gray-800">Qty: ${product.quantity}</p>
-            </div>
-            <p class="text-sm text-gray-500 mt-1">${product.category}</p>
-        </div>
-    `;
+    // Product Card Content
+    const productImage = document.createElement("img");
+    productImage.src = product.image;
+    productImage.alt = product.name;
+    productImage.classList.add("w-full", "h-40", "object-cover", "rounded-md");
 
+    const productDetails = document.createElement("div");
+    productDetails.classList.add("mt-4");
+
+    const productName = document.createElement("h3");
+    productName.classList.add("font-semibold", "text-lg", "text-gray-700");
+    productName.textContent = product.name;
+
+    const priceAndQuantity = document.createElement("div");
+    priceAndQuantity.classList.add("flex", "justify-between", "items-center");
+
+    const price = document.createElement("p");
+    price.classList.add("text-sm", "text-gray-500");
+    price.textContent = `₱${product.price}`;
+
+    const quantity = document.createElement("p");
+    quantity.classList.add("text-sm", "font-semibold", "text-gray-800");
+    quantity.textContent = `Qty: ${product.quantity}`;
+
+    const category = document.createElement("p");
+    category.classList.add("text-sm", "text-gray-500", "mt-1");
+    category.textContent = product.category;
+
+    // Appending elements
+    priceAndQuantity.append(price, quantity);
+    productDetails.append(productName, priceAndQuantity, category);
+    card.append(productImage, productDetails);
+
+    // Add event listener for modal interaction
     card.addEventListener("click", () => showModal(product));
+
     return card;
 }
+
 
 // Show product details in a modal with fade-in effect
 function showModal(product) {

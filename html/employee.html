@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/home.css">
-    <link rel="stylesheet" href="/css/mediaType.css">
-    <link rel="stylesheet" href="/css/keyframe.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <title>Employee Dashboard</title>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
-
 <body class="font-inter bg-gray-100 min-h-screen flex flex-col">
 
     <!-- Header -->
@@ -34,16 +29,28 @@
             </nav>
         </div>
     </header>
-
-    <!-- Main Content -->
-    <main id="main-content" class="flex-1 p-8">
-        <div id="user-info" class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Welcome, <span id="fullName" class="text-blue-600">Loading...</span>!</h1>
-            <!-- Additional home page content can go here -->
+    
+    <main class="flex-grow py-6">
+        <div class="container mx-auto px-6 py-4">
+            <h2 class="text-lg font-semibold mb-4">Your Attendance</h2>
+            <div class="bg-white p-4 rounded shadow">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Date</th>
+                            <th class="px-4 py-2 text-left">Status</th>
+                            <th class="px-4 py-2 text-left">In Time</th>
+                            <th class="px-4 py-2 text-left">Out Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-rows">
+                        <!-- Logs go here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </main>
+    </main>     
 
-    <!-- Footer -->
     <footer class="bg-[#030328] text-white py-4 text-center">
         <p>&copy; 2025 Sample Inc. All rights reserved.</p>
     </footer>
@@ -51,8 +58,7 @@
     <script src="/js/user.js"></script>
     <script src="/js/menu.js"></script>
     <script src="/js/home.js"></script>
+    <script src="/js/employee.js"></script>
     <script src="/js/connection.js"></script>
-
 </body>
-
 </html>
