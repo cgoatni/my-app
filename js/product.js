@@ -24,7 +24,6 @@ async function fetchProducts(category = "") {
         }
 
         const products = await response.json();
-        console.log("Fetched products:", products);
 
         displayProducts(products);
     } catch (error) {
@@ -61,12 +60,13 @@ function createProductCard(product) {
     const card = document.createElement("div");
     card.classList.add("bg-white", "p-4", "rounded-lg", "shadow-md", "cursor-pointer");
 
-    // Product Card Content
+    // Product Image
     const productImage = document.createElement("img");
     productImage.src = product.image;
     productImage.alt = product.name;
     productImage.classList.add("w-full", "h-40", "object-cover", "rounded-md");
 
+    // Product Details
     const productDetails = document.createElement("div");
     productDetails.classList.add("mt-4");
 
@@ -74,6 +74,7 @@ function createProductCard(product) {
     productName.classList.add("font-semibold", "text-lg", "text-gray-700");
     productName.textContent = product.name;
 
+    // Price and Quantity Section
     const priceAndQuantity = document.createElement("div");
     priceAndQuantity.classList.add("flex", "justify-between", "items-center");
 
@@ -85,13 +86,54 @@ function createProductCard(product) {
     quantity.classList.add("text-sm", "font-semibold", "text-gray-800");
     quantity.textContent = `Qty: ${product.quantity}`;
 
+    // Category and Delete Button Section
+    const catAndbtn = document.createElement("div");
+    catAndbtn.classList.add("flex", "justify-between", "items-center", "mt-2");
+
     const category = document.createElement("p");
-    category.classList.add("text-sm", "text-gray-500", "mt-1");
+    category.classList.add("text-sm", "text-gray-500");
     category.textContent = product.category;
 
-    // Appending elements
+    // Delete Button
+    const deleteButton = document.createElement("button");
+    deleteButton.classList.add("text-red-500", "bg-white", "hover:bg-red-100", "border", "border-red-500", "rounded", "px-3", "py-1", "text-xs");
+    deleteButton.textContent = "Delete";
+
+    // Delete Button Event Listener (Staff URL for deleting)
+    deleteButton.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent the card click event
+    
+        if (!product._id) {
+            alert("Product ID is missing.");
+            return;
+        }
+    
+        // Construct the delete URL using _id or $oid
+        const productId = product._id.$oid || product._id; // Check if _id is in { "$oid": "someId" } format
+        const deleteUrl = `/delete/product/${productId}`;
+
+        // Call delete function (replace with actual URL for deletion)
+        fetch(deleteUrl, { method: "DELETE" })
+            .then(response => {
+                if (response.ok) {
+                    card.remove(); // Remove the card from UI
+                    alert("Product deleted successfully!");
+                } else {
+                    response.json().then(data => alert(data.error || "Failed to delete product."));
+                }
+            })
+            .catch(error => {
+                alert("An error occurred while deleting the product.");
+            });
+    });
+
+    // Appending elements to their respective containers
     priceAndQuantity.append(price, quantity);
-    productDetails.append(productName, priceAndQuantity, category);
+    productDetails.append(productName, priceAndQuantity);
+    catAndbtn.append(category, deleteButton);
+    productDetails.append(catAndbtn);
+    
+    // Append all to the card
     card.append(productImage, productDetails);
 
     // Add event listener for modal interaction
@@ -99,7 +141,6 @@ function createProductCard(product) {
 
     return card;
 }
-
 
 // Show product details in a modal with fade-in effect
 function showModal(product) {

@@ -25,7 +25,6 @@ async function fetchMenuData() {
             const orderB = parseInt(b.order?.$numberInt || b.order || 0);
             return orderA - orderB;
           }).forEach(item => {
-            console.log(item);
             const isLogout = item.name.toLowerCase() === 'logout';
             const isRoleAllowed = item.role.some(role => userRole === role);
             if (!isRoleAllowed) return;
