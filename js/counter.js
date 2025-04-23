@@ -5,6 +5,72 @@ function formatNumberWithCommas(number) {
         .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// ---------- Calculate the change ----------
+function calculateChange() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0); // Dynamically calculate total
+
+    let cashEntered = document.getElementById('cash-input').value.replace(/[^0-9.]/g, ''); // Clean input (remove non-numeric)
+
+    // Default to '0.00' if the field is empty
+    if (cashEntered === '') {
+        cashEntered = '0.00';
+    }
+
+    // Remove the ₱ sign and commas, then parse as a float
+    let cash = parseFloat(cashEntered.replace('₱', '').replace(',', ''));
+
+    // If cash is not a valid number, set it to 0
+    if (isNaN(cash)) {
+        cash = 0;
+    }
+
+    const change = cash - totalAmount;
+
+    // If the change is positive or zero, show the amount; otherwise hide the change container
+    if (change >= 0) {
+        document.getElementById('change-amount').textContent = '₱' + formatNumberWithCommas(change);
+        document.getElementById('change-container').style.display = 'flex'; // Show the change container
+    } else {
+        document.getElementById('change-amount').textContent = '₱0.00';
+        document.getElementById('change-container').style.display = 'none';  // Hide the change container
+    }
+}
+
+// ---------- Event listener to trigger on input change ----------
+document.getElementById('cash-input').addEventListener('input', function() {
+    let cashEntered = this.value;
+
+    // Remove any non-numeric characters except the decimal point
+    cashEntered = cashEntered.replace(/[^0-9.]/g, ''); 
+
+    // Ensure only one decimal point is allowed
+    const decimalIndex = cashEntered.indexOf('.');
+    if (decimalIndex !== -1) {
+        // Keep only the first decimal point and limit to 2 decimal places
+        cashEntered = cashEntered.substring(0, decimalIndex + 3); // Limit to two decimals
+    }
+
+    // Update the input field with the cleaned value
+    this.value = cashEntered;
+
+    // Recalculate change as the user types
+    calculateChange();
+});
+
+// ---------- Event listener for when the input field loses focus (blur) ----------
+document.getElementById('cash-input').addEventListener('blur', function() {
+    let cashEntered = this.value;
+
+    // If no decimal is present, append '.00'
+    if (!cashEntered.includes('.') && cashEntered !== '') {
+        this.value = cashEntered + '.00';
+    }
+
+    // Recalculate change when the input loses focus
+    calculateChange();
+});
+
 // ---------- Add product to cart ----------
 function addToCart(product) {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -94,9 +160,9 @@ function hidePaymentModal() {
     document.getElementById("payment-modal").classList.add("hidden");
 }
 
-// ---------- Confirm payment and calculate change ----------
 function confirmPayment() {
-    const cash = parseFloat(document.getElementById("cash-input").value);
+    const cashInput = document.getElementById("cash-input");
+    const cash = parseFloat(cashInput.value);
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -111,17 +177,46 @@ function confirmPayment() {
         return;
     }
 
-    const change = (cash - total).toFixed(2);
+    const change = parseFloat((cash - total).toFixed(2));
 
-    // Hide the payment modal
-    hidePaymentModal();
+    const fullNameElement = document.getElementById("fullName");
+    const user = fullNameElement?.textContent || "Unknown";
+  
+    const receiptData = {
+      user,
+      items: cart.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      total,
+      cash,
+      change,
+      date: new Date().toISOString()
+    };
 
-    // Show the alert message
-    alert(`Payment successful!\nChange: ₱${formatNumberWithCommas(change)}`);
+    // Send to backend (POST to /receipt)
+    fetch('/insert/receipts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(receiptData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hide payment modal
+        hidePaymentModal();
 
-    // Clear cart and update UI
-    localStorage.removeItem("cart");
-    updateCart();
+        // Show success alert with change
+        alert(`Payment successful!\nChange: ₱${formatNumberWithCommas(change)}`);
+
+        // Clear cart and update UI
+        localStorage.removeItem("cart");
+        updateCart();
+    })
+    .catch(error => {
+        console.error("Error sending receipt:", error);
+        alert("An error occurred while processing the payment.");
+    });
 }
 
 // ---------- Event listeners ----------

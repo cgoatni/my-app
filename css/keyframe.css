@@ -6,3 +6,27 @@
         opacity: 1;
     }
 }
+
+@keyframes tilt-hover {
+    0% {
+      transform: rotate(0deg); /* Start at the normal position */
+    }
+    25% {
+      transform: rotate(6deg); /* Tilt slightly to the right */
+    }
+    50% {
+      transform: rotate(-6deg); /* Tilt slightly to the left */
+    }
+    75% {
+      transform: rotate(3deg); /* Slight right tilt */
+    }
+    100% {
+      transform: rotate(0deg); /* Return to the original position */
+    }
+  }
+  
+  .hover-tilt:hover {
+    animation: tilt-hover 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; /* Adds smoothness and a more bouncy feel */
+  }
+  
+  

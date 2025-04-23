@@ -58,6 +58,17 @@ async function fetchUserData() {
     }
 }
 
+async function insertUser() {
+    try {
+        const res = await fetch("/insert/user", { method: "POST" });
+        if (!res.ok) throw new Error("Failed to insert user");
+
+        const user = await res.json();
+        showUserModal(user);
+    } catch (err) {
+        console.error("Insert error:", err);
+    }
+}
 
 
 // ================== USER ACTIONS ==================

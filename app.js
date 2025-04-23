@@ -29,12 +29,18 @@ const sessionMiddleware = session({
     saveUninitialized: false,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        collectionName: 'sessions'
+        collectionName: 'sessions',
+        ttl: 14 * 24 * 60 * 60,  // Set session TTL (Time to Live), e.g., 14 days
     }),
-    cookie: { secure: false }
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 24,  // 1 day expiry
+    }
 });
 
 app.use(sessionMiddleware);
+
 
 // ===================================================================
 // 2. DATABASE CONNECTION
@@ -112,17 +118,18 @@ servePage('/settings', 'settings.html');
 servePage('/staff', 'staff.html');
 servePage('/counter', 'counter.html');
 servePage('/employee', 'employee.html');
+servePage('/reports', 'reports.html');
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );
 
 // Static JS files
-['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'counter', 'settings', 'employee'].forEach(file =>
+['emailer', 'index', 'signup', 'login', 'user', 'menu', 'product', 'connection', 'dashboard', 'home', 'profile', 'staff', 'counter', 'settings', 'employee', 'reports'].forEach(file =>
     serveFile(`/js/${file}.js`, 'js', `${file}.js`)
 );
 
 // Static CSS files
-['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe', 'employee'].forEach(file =>
+['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe', 'employee', 'reports'].forEach(file =>
     serveFile(`/css/${file}.css`, 'css', `${file}.css`)
 );
 
@@ -219,6 +226,7 @@ app.post('/login', async (req, res) => {
     const isAdmin = user.role.toLowerCase() === 'admin';
     let loginLogId = null;
 
+    // Log login event for non-admin users
     if (!isAdmin) {
         const result = await db.collection('logs').insertOne({
             userId: user._id,
@@ -233,14 +241,40 @@ app.post('/login', async (req, res) => {
         loginLogId = result.insertedId;
     }
 
-    req.session.user = {
-        ...((({ lastName, firstName, email, contact, address, gender, dob, username, role }) => ({
-            lastName, firstName, email, contact, address, gender, dob, username, role
-        }))(user)),
-        ...(loginLogId && { loginLogId, loginTime })
-    };
+    // Regenerate the session (this will automatically clean up the old session)
+    req.session.regenerate((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to regenerate session' });
+        }
 
-    res.redirect(isAdmin ? '/dashboard' : user.role === 'staff' ? '/staff' : '/home');
+        // Clear out any previous user data from the session
+        req.session.user = null;  // Explicitly clear the user data
+
+        // Assign new user data to the session
+        req.session.user = {
+            lastName: user.lastName,
+            firstName: user.firstName,
+            email: user.email,
+            contact: user.contact,
+            address: user.address,
+            gender: user.gender,
+            dob: user.dob,
+            username: user.username,
+            role: user.role,
+            loginLogId,
+            loginTime
+        };
+
+        // Save the session with the new session ID in MongoDB
+        req.session.save((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Failed to save session' });
+            }
+
+            // Redirect based on user role
+            res.redirect(isAdmin ? '/dashboard' : user.role === 'staff' ? '/staff' : '/home');
+        });
+    });
 });
 
 // 7.3 Logout
@@ -406,10 +440,24 @@ app.get('/logs', async (req, res) => {
 // 9.1 Get products
 app.get('/products', async (req, res) => {
     try {
+        const category = req.query.category;
         const products = await db.collection('products').find().toArray();
+        if (category) {
+            // If category is provided, filter products by category (case-insensitive)
+            const filteredProducts = products.filter(product => 
+                product.category && product.category.toLowerCase() === category.toLowerCase()
+            );
+            
+            if (filteredProducts.length > 0) {
+                return res.json(filteredProducts); // Return filtered products
+            } else {
+                return res.status(404).json({ message: 'No products found in this category.' });
+            }
+        }
         res.json(products);
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error fetching products:", error);
+        res.status(500).json({ error: "Internal Server Error" }); // Handle any errors during the database operation
     }
 });
 
@@ -499,25 +547,46 @@ app.delete('/delete/product/:id', async (req, res) => {
     }
 });
 
-// app.get('/image/:filename', (req, res) => {
-//     const { filename } = req.params;
-//     const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
+app.get('/image/:filename', (req, res) => {
+    const { filename } = req.params;
+    const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
 
-//     const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
+    const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
 
-//     downloadStream.on('data', (chunk) => {
-//         res.write(chunk);
-//     });
+    downloadStream.on('data', (chunk) => {
+        res.write(chunk);
+    });
 
-//     downloadStream.on('end', () => {
-//         res.end();
-//     });
+    downloadStream.on('end', () => {
+        res.end();
+    });
 
-//     downloadStream.on('error', () => {
-//         res.status(404).json({ error: 'Image not found' });
-//     });
-// });
+    downloadStream.on('error', () => {
+        res.status(404).json({ error: 'Image not found' });
+    });
+});
 
+app.post('/insert/receipts', async (req, res) => {
+    try {
+        const receipt = req.body;
+        // Save the receipt to the database
+        await db.collection('receipts').insertOne(receipt);
+        res.status(200).json({ message: "Receipt received successfully." });
+    } catch (error) {
+        console.error("Error saving receipt:", error);
+        res.status(500).json({ error: "Failed to save receipt." });
+    }
+});
+
+app.get('/get/receipts', async (req, res) => {
+    try {
+        const receipts = await db.collection('receipts').find().toArray();
+        res.json(receipts);
+    } catch (error) {
+        console.error("Error fetching receipts:", error);
+        res.status(500).json({ error: "Failed to fetch receipts." });
+    }
+});
 
 // ===================================================================
 // 10. CONTACT FORM

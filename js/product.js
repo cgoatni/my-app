@@ -4,6 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ================== PRODUCT FUNCTIONS ==================
 // Fetch products from the server
+document.getElementById('category-dropdown').addEventListener('change', function() {
+    const selectedCategory = this.value;
+    fetchProducts(selectedCategory);  // Assuming fetchProducts is defined elsewhere
+});
+
 async function fetchProducts(category = "") {
     const productCardsContainer = document.getElementById("product-cards");
 
@@ -96,28 +101,41 @@ function createProductCard(product) {
 
     // Button (Delete or Add to Cart based on URL)
     const actionButton = document.createElement("button");
-    actionButton.classList.add("bg-white", "border", "rounded", "px-3", "py-1", "text-xs");
+    actionButton.classList.add(
+        "bg-white",
+        "border",
+        "rounded-full",
+        "p-2",
+        "text-xs",
+        "flex",
+        "items-center",
+        "justify-center",
+        "transition-transform",
+        "hover-tilt"
+      );         
 
-    // Default button text and color (Red)
-    actionButton.textContent = "Delete";
-    actionButton.classList.add("text-red-500", "border-red-500", "hover:bg-red-100");
+    // Default to "Delete" icon
+    const deleteIcon = document.createElement("i");
+    deleteIcon.classList.add("fa-solid", "fa-trash", "text-red-500", "h-4", "w-4"); // Solid trash icon with Tailwind classes
 
+    // Create the Add to Cart icon
+    const cartIcon = document.createElement("i");
+    cartIcon.classList.add("fa-solid", "fa-cart-plus", "text-green-500", "h-4", "w-4"); // Solid cart-plus icon with Tailwind classes
 
     if (window.location.pathname.includes("counter")) {
-        actionButton.textContent = "Add to Cart";
-        actionButton.classList.replace("text-red-500", "text-green-500");
-        actionButton.classList.replace("border-red-500", "border-green-500");
-        actionButton.classList.replace("hover:bg-red-100", "hover:bg-green-100");
+        // Change to "Add to Cart" icon
+        actionButton.innerHTML = ''; // Clear any existing content
+        actionButton.appendChild(cartIcon);
 
         // Add to Cart Event Listener
         actionButton.addEventListener("click", (event) => {
             event.stopPropagation(); // Prevent the card click event
-
-            // Call function to add the product to the cart
-            addToCart(product);
+            addToCart(product); // Add the product to cart
         });
     } else {
-        actionButton.textContent = "Delete";
+        // Set Delete icon
+        actionButton.innerHTML = ''; // Clear previous content
+        actionButton.appendChild(deleteIcon);
 
         // Delete Button Event Listener
         actionButton.addEventListener("click", (event) => {
@@ -128,8 +146,7 @@ function createProductCard(product) {
                 return;
             }
 
-            // Construct the delete URL using _id or $oid
-            const productId = product._id.$oid || product._id; // Check if _id is in { "$oid": "someId" } format
+            const productId = product._id.$oid || product._id; // Handle _id formats
             const deleteUrl = `/delete/product/${productId}`;
 
             // Call delete function (replace with actual URL for deletion)
