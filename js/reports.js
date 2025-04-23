@@ -70,20 +70,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const table = header.closest("table");
       const tbody = table.querySelector("tbody");
       const index = [...header.parentNode.children].indexOf(header);
-      const ascending = header.classList.toggle("asc");
+      const isAsc = !header.classList.contains("asc");
 
-      [...tbody.querySelectorAll("tr")]
-        .sort((a, b) => {
-          const cellA = a.children[index].textContent.trim();
-          const cellB = b.children[index].textContent.trim();
-          const isNumeric = !isNaN(parseFloat(cellA)) && !isNaN(parseFloat(cellB));
+      // Clear other headers' classes
+      header.parentNode.querySelectorAll("th").forEach(th => th.classList.remove("asc", "desc"));
+      header.classList.add(isAsc ? "asc" : "desc");
 
-          return (isNumeric
-            ? parseFloat(cellA) - parseFloat(cellB)
-            : cellA.localeCompare(cellB)) * (ascending ? 1 : -1);
-        })
-        .forEach(row => tbody.appendChild(row));
+      // Sort rows
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      rows.sort((a, b) => {
+        const cellA = a.children[index].textContent.trim().replace("₱", "");
+        const cellB = b.children[index].textContent.trim().replace("₱", "");
+        const isNumeric = !isNaN(parseFloat(cellA)) && !isNaN(parseFloat(cellB));
+
+        return (isNumeric
+          ? parseFloat(cellA) - parseFloat(cellB)
+          : cellA.localeCompare(cellB)) * (isAsc ? 1 : -1);
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
     });
   });
 });
+
   
