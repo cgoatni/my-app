@@ -12,6 +12,7 @@
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs-table@0.2.0/sortable.min.js"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
 </head>
 
@@ -57,21 +58,21 @@
         </section>
 
         <!-- Product Sales Table -->
-        <div class="overflow-x-auto mt-6">
-            <table id="sales-report-table" class="min-w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+        <div class="max-h-96 overflow-y-auto custom-scrollbar">
+            <table class="sortable table-auto w-full text-sm text-left text-gray-500">
+               <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0 z-10">
                 <tr>
-                <th scope="col" class="px-6 py-3">Product Name</th>
-                <th scope="col" class="px-6 py-3">Quantity Sold</th>
-                <th scope="col" class="px-6 py-3">Price per Unit (₱)</th>
-                <th scope="col" class="px-6 py-3">Total Sales (₱)</th>
+                  <th scope="col" class="px-6 py-3 cursor-pointer">Product Name</th>
+                  <th scope="col" class="px-6 py-3 cursor-pointer">Quantity</th>
+                  <th scope="col" class="px-6 py-3 cursor-pointer">Price</th>
+                  <th scope="col" class="px-6 py-3 cursor-pointer">Total</th>
                 </tr>
-            </thead>
-            <tbody id="sales-report-body">
-                <!-- JavaScript will inject rows here -->
-            </tbody>
+              </thead>
+              <tbody id="sales-report-body">
+                <!-- Rows injected by JS -->
+              </tbody>
             </table>
-        </div>
+        </div>                     
     </main>
 
     <!-- Footer -->

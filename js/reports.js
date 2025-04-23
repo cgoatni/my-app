@@ -62,4 +62,28 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       });
   });
+
+// sorting
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("th").forEach(header => {
+    header.addEventListener("click", () => {
+      const table = header.closest("table");
+      const tbody = table.querySelector("tbody");
+      const index = [...header.parentNode.children].indexOf(header);
+      const ascending = header.classList.toggle("asc");
+
+      [...tbody.querySelectorAll("tr")]
+        .sort((a, b) => {
+          const cellA = a.children[index].textContent.trim();
+          const cellB = b.children[index].textContent.trim();
+          const isNumeric = !isNaN(parseFloat(cellA)) && !isNaN(parseFloat(cellB));
+
+          return (isNumeric
+            ? parseFloat(cellA) - parseFloat(cellB)
+            : cellA.localeCompare(cellB)) * (ascending ? 1 : -1);
+        })
+        .forEach(row => tbody.appendChild(row));
+    });
+  });
+});
   
