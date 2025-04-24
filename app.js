@@ -119,6 +119,7 @@ servePage('/counter', 'counter.html');
 servePage('/employee', 'employee.html');
 servePage('/reports', 'reports.html');
 servePage('/menuItem', 'menuItem.html');
+servePage('/help', 'help.html');
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );

@@ -9,6 +9,14 @@
   --blue-600: #2563eb;
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
