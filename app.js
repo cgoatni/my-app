@@ -118,6 +118,7 @@ servePage('/staff', 'staff.html');
 servePage('/counter', 'counter.html');
 servePage('/employee', 'employee.html');
 servePage('/reports', 'reports.html');
+servePage('/menuItem', 'menuItem.html');
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );
@@ -128,7 +129,7 @@ app.get('/dashboard', ensureAdmin, (req, res) =>
 );
 
 // Static CSS files
-['dashboard', 'signup', 'login', 'index', 'home', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe', 'employee', 'reports'].forEach(file =>
+['dashboard', 'signup', 'login', 'index', 'home', 'menuItem', 'profile', 'settings', 'staff', 'counter', 'mediaType', 'keyframe', 'employee', 'reports'].forEach(file =>
     serveFile(`/css/${file}.css`, 'css', `${file}.css`)
 );
 
@@ -303,7 +304,7 @@ app.post("/logout", async (req, res) => {
 });
 
 // ===================================================================
-// 8. USER & MENU ROUTES
+// 8. USER ROUTES
 // ===================================================================
 // 8.1 Fetch all users (testing)
 app.get('/users', async (req, res) => {
@@ -397,7 +398,10 @@ app.post('/update/user', async (req, res) => {
     }
 });
 
-// 8.2 Fetch menu by role
+// ===================================================================
+// 9. MENU ROUTES
+// ===================================================================
+// 9.1 Fetch menu by role
 app.get('/menu', async (req, res) => {
     const role = getUserRole(req);
     if (!role) return res.status(403).json({ error: "User role not found or unauthorized" });
@@ -406,6 +410,75 @@ app.get('/menu', async (req, res) => {
         const menuItems = await db.collection('menu').find({ role }).toArray();
         res.json(menuItems);
     } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// 9.2 Insert 
+app.post('/insert/menu', async (req, res) => {
+    const { role, menuItems } = req.body;
+
+    if (!role || !menuItems) {
+        return res.status(400).json({ error: "Role and menu items are required" });
+    }
+
+    try {
+        const result = await db.collection('menu').insertOne({
+            role,
+            items: menuItems
+        });
+
+        res.status(201).json({ message: "Menu inserted successfully", menuId: result.insertedId });
+    } catch (error) {
+        console.error("❌ Menu Insert Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+// 9.3 Update menu
+app.put('/update/menu/:id', async (req, res) => {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    try {
+        const result = await db.collection('menu').updateOne(
+            { _id: new ObjectId(id) },
+            { $set: updatedData }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: "Menu item not found" });
+        }
+
+        res.status(200).json({ message: "Menu updated successfully" });
+    } catch (err) {
+        console.error("❌ Error updating menu item:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// 9.4 Delete menu
+app.delete('/delete/menu/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: "Menu ID is required" });
+    }
+
+    try {
+        const result = await db.collection('menu').deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: "Menu item not found" });
+        }
+
+        res.status(200).json({ message: "Menu item deleted successfully" });
+    } catch (error) {
+        console.error("❌ Menu Deletion Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
@@ -433,10 +506,10 @@ app.get('/logs', async (req, res) => {
 });
 
 // ===================================================================
-// 9. PRODUCT ROUTES (Testing)
+// 10. PRODUCT ROUTES (Testing)
 // ===================================================================
 
-// 9.1 Get products
+// 10.1 Get products
 app.get('/products', async (req, res) => {
     try {
         const category = req.query.category;
@@ -468,7 +541,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 9.2 Add product
+// 10.2 Add product
 app.post('/add/product', upload.single('image'), async (req, res) => {
     const { name, description, price, quantity, category } = req.body;
     const image = req.file?.filename;
@@ -481,10 +554,10 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
         const result = await db.collection('products').insertOne({
             name,
             description,
-            price,
+            price: parseInt(price), 
             image,
-            quantity,
-            category
+            category,
+            quantity: parseInt(quantity) 
         });
 
         res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
@@ -494,7 +567,7 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
 });
 
 
-// 9.3 Update product
+// 10.3 Update product
 app.put('/update/product/:id', async (req, res) => {
     const productId = req.params.id;
     const { name, description, price, image, quantity, category } = req.body;
@@ -529,7 +602,7 @@ app.put('/update/product/:id', async (req, res) => {
     }
 });
 
-// 9.4 Delete product
+// 10.4 Delete product
 app.delete('/delete/product/:id', async (req, res) => {
     const productId = req.params.id;
 
@@ -565,6 +638,9 @@ app.get('/image/:filename', (req, res) => {
     });
 });
 
+//===================================================================
+// 11. RECEIPT ROUTES (Testing)
+// ===================================================================
 app.post('/insert/receipts', async (req, res) => {
     try {
         const receipt = req.body;
@@ -577,6 +653,7 @@ app.post('/insert/receipts', async (req, res) => {
     }
 });
 
+// Fetch all receipts
 app.get('/get/receipts', async (req, res) => {
     try {
         const receipts = await db.collection('receipts').find().toArray();
@@ -588,7 +665,7 @@ app.get('/get/receipts', async (req, res) => {
 });
 
 // ===================================================================
-// 10. CONTACT FORM
+// 12. CONTACT FORM
 // ===================================================================
 app.post("/submit-contact", async (req, res) => {
     const { name, email, message } = req.body;
@@ -603,14 +680,14 @@ app.post("/submit-contact", async (req, res) => {
 });
 
 // ===================================================================
-// 11. 404 HANDLER
+// 13. 404 HANDLER
 // ===================================================================
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'html', '404.html'));
 });
 
 // ===================================================================
-// 12. START SERVER
+// 14. START SERVER
 // ===================================================================
 connectDB().then(() => {
     server.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}/`));
