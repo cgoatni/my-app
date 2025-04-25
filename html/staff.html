@@ -131,14 +131,15 @@
         
             <!-- Product Image Upload and Preview (full-width) -->
             <div class="text-center">
-                <label for="product-image" class="block text-gray-700 font-medium">Product Image</label>
-                <input type="file" id="product-image" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer" onchange="previewProductImage(event)">
-                
-                <!-- Product Image Preview -->
-                <div id="product-image-preview" class="mt-4">
-                    <img id="product-img" src="#" alt="Product Image Preview" class="hidden w-32 h-32 rounded-lg mx-auto object-cover border-2 border-gray-300 shadow-md" />
-                    <p id="product-error-message" class="text-red-500 mt-2 hidden">Please upload a valid image file.</p>
-                </div>
+              <label for="product-image" class="block text-gray-700 font-medium">Product Image</label>
+              <input  type="file" id="product-image" name="image" accept="image/*"  class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer" onchange="previewProductImage(event)"/>
+              
+              <!-- Product Image Preview -->
+              <div id="product-image-preview" class="mt-4">
+                  <img id="product-img" src="#" alt="Product Image Preview" class="hidden w-32 h-32 rounded-lg mx-auto object-cover border-2 border-gray-300 shadow-md" />
+                  <p id="product-error-message" class="text-red-500 mt-2 hidden">Please upload a valid image file.</p>
+              </div>
+              
             </div>
         
             <!-- Product Quantity and Category (side by side) -->

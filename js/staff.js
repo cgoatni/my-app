@@ -1,4 +1,3 @@
-
 // Preview product image before uploading
 function previewProductImage(event) {
     const file = event.target.files[0];
@@ -24,6 +23,12 @@ document.getElementById("add-product-form").addEventListener("submit", async (e)
 
     const form = e.target;
     const formData = new FormData(form); // This includes all inputs and the file
+
+    console.log("Form data being sent:", formData); // Debugging line
+
+    for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
 
     try {
         const response = await fetch('/add/product', {

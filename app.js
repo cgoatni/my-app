@@ -8,6 +8,7 @@ const path = require('path');
 const session = require('express-session');
 const http = require("http");
 const WebSocket = require('ws');
+const fs = require('fs');
 const multer = require('multer');
 const { sendWelcomeEmail, sendContactFormEmail } = require('./js/emailer');
 
@@ -120,6 +121,7 @@ servePage('/employee', 'employee.html');
 servePage('/reports', 'reports.html');
 servePage('/menuItem', 'menuItem.html');
 servePage('/help', 'help.html');
+
 app.get('/dashboard', ensureAdmin, (req, res) =>
     res.sendFile(path.join(__dirname, 'html', 'dashboard.html'))
 );
@@ -534,39 +536,61 @@ app.get('/products', async (req, res) => {
     }
 });
 
-// Setup where to store images
+// Ensure the 'img' directory exists
+if (!fs.existsSync('img')) {
+    fs.mkdirSync('img');
+}
+
+// Setup multer storage for images
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'img'),
     filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
 
-const upload = multer({ storage });
+// Multer file validation for images
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+    },
+});
 
-// 10.2 Add product
+// Serve static files from 'img' directory
+app.use('/img', express.static(path.join(__dirname, 'img')));
+
+// Add product route with image upload
 app.post('/add/product', upload.single('image'), async (req, res) => {
     const { name, description, price, quantity, category } = req.body;
-    const image = req.file?.filename;
+    const image = "/img/" + req.file?.filename || "/img/sample.jpg"; // Default image if no file uploaded
 
-    // if (!name || !description || !price || !image || !quantity || !category) {
-    //     return res.status(400).json({ error: 'All fields are required' });
-    // }
+    // Handle missing file
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file uploaded' });
+    }
 
     try {
         const result = await db.collection('products').insertOne({
             name,
             description,
-            price: parseInt(price), 
+            price: parseInt(price),
             image,
             category,
-            quantity: parseInt(quantity) 
+            quantity: parseInt(quantity),
         });
 
-        res.status(201).json({ message: 'Product added successfully', productId: result.insertedId });
+        res.status(201).json({
+            message: 'Product added successfully',
+            productId: result.insertedId,
+            imageUrl: `/img/${image}`, // Include the image URL in the response
+        });
     } catch (error) {
+        console.error('Error inserting product:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 // 10.3 Update product
 app.put('/update/product/:id', async (req, res) => {
@@ -585,10 +609,10 @@ app.put('/update/product/:id', async (req, res) => {
                 $set: {
                     name,
                     description,
-                    price,
+                    price: parseInt(price),
                     image,
-                    quantity,
-                    category
+                    category,
+                    quantity: parseInt(quantity),
                 }
             }
         );
@@ -604,21 +628,47 @@ app.put('/update/product/:id', async (req, res) => {
 });
 
 // 10.4 Delete product
+// 10.4 Delete product
 app.delete('/delete/product/:id', async (req, res) => {
     const productId = req.params.id;
 
     try {
+        const product = await db.collection('products').findOne({ _id: new ObjectId(productId) });
+
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
         const result = await db.collection('products').deleteOne({ _id: new ObjectId(productId) });
 
         if (result.deletedCount > 0) {
+            // Extract just the filename
+            let filename = product.image;
+
+            // In case the filename includes a path like '/img/filename.jpg', strip it
+            if (filename.startsWith('/img/')) {
+                filename = filename.replace('/img/', '');
+            }
+
+            const imagePath = path.join(__dirname, 'img', filename);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+                console.log(`Image ${filename} deleted successfully.`);
+            } else {
+                console.log(`Image ${filename} not found, skipping deletion.`);
+            }
+
             res.status(200).json({ message: 'Product deleted successfully' });
         } else {
             res.status(404).json({ error: 'Product not found' });
         }
     } catch (error) {
+        console.error('Error deleting product:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 app.get('/image/:filename', (req, res) => {
     const { filename } = req.params;
