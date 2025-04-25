@@ -22,13 +22,7 @@ document.getElementById("add-product-form").addEventListener("submit", async (e)
     e.preventDefault();
 
     const form = e.target;
-    const formData = new FormData(form); // This includes all inputs and the file
-
-    console.log("Form data being sent:", formData); // Debugging line
-
-    for (const [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-    }
+    const formData = new FormData(form); // This includes all inputs and the files
 
     try {
         const response = await fetch('/add/product', {

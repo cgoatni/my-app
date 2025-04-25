@@ -669,26 +669,6 @@ app.delete('/delete/product/:id', async (req, res) => {
     }
 });
 
-
-app.get('/image/:filename', (req, res) => {
-    const { filename } = req.params;
-    const gridFSBucket = new MongoClient(process.env.MONGO_URI).db().bucket('fs');
-
-    const downloadStream = gridFSBucket.openDownloadStreamByName(filename);
-
-    downloadStream.on('data', (chunk) => {
-        res.write(chunk);
-    });
-
-    downloadStream.on('end', () => {
-        res.end();
-    });
-
-    downloadStream.on('error', () => {
-        res.status(404).json({ error: 'Image not found' });
-    });
-});
-
 //===================================================================
 // 11. RECEIPT ROUTES (Testing)
 // ===================================================================
