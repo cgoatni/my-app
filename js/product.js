@@ -1,18 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Initial product load
     fetchProducts();
-});
 
-// ================== PRODUCT FUNCTIONS ==================
-// Fetch products from the server
-document.getElementById('category-dropdown').addEventListener('change', function() {
-    const selectedCategory = this.value;
-    fetchProducts(selectedCategory);  // Assuming fetchProducts is defined elsewhere
+    // Category change event
+    document.getElementById('category-dropdown')?.addEventListener('change', function () {
+        fetchProducts(this.value);
+    });
+
+    // Search input keyup event
+    document.getElementById('search-input')?.addEventListener('keyup', function () {
+        const category = document.getElementById('category-dropdown')?.value || "";
+        fetchProducts(category);
+    });
 });
 
 async function fetchProducts(category = "") {
     const productCardsContainer = document.getElementById("product-cards");
+    const search = document.getElementById("search-input").value.toLowerCase();
 
-    // Check if the container exists
     if (!productCardsContainer) {
         console.error("Error: Element with id 'product-cards' not found.");
         return;
@@ -30,7 +35,13 @@ async function fetchProducts(category = "") {
 
         const products = await response.json();
 
-        displayProducts(products);
+        const filtered = products.filter(item => {
+            const matchesCategory = !category || item.category.toLowerCase() === category.toLowerCase();
+            const matchesSearch = item.name.toLowerCase().includes(search);
+            return matchesCategory && matchesSearch;
+        });
+
+        displayProducts(filtered);
     } catch (error) {
         console.error("Error fetching products:", error);
         productCardsContainer.innerHTML = "<p class='text-center text-red-500'>Failed to load products.</p>";
@@ -155,6 +166,7 @@ function createProductCard(product) {
                     if (response.ok) {
                         card.remove(); // Remove the card from UI
                         alert("Product deleted successfully!");
+                        window.location.reload(); // Reload the page to reflect changes
                     } else {
                         response.json().then(data => alert(data.error || "Failed to delete product."));
                     }

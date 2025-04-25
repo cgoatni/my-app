@@ -8,8 +8,6 @@ async function fetchUserData() {
         const response = await fetch('/api/user');
         const data = await response.json();
 
-        console.log('User data:', data);  // Debugging line to check the response
-
         if (data.email) {
             // Populate profile fields with user data
             document.getElementById('profile-name').innerText = data.firstName + ' ' + data.lastName || 'N/A';

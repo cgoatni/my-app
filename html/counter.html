@@ -40,21 +40,37 @@
   <main class="flex-1 p-6 space-y-6 w-full">
     <section class="bg-white px-6 py-4 rounded-lg shadow-md w-full">
       <h3 class="text-lg font-semibold text-gray-700 mb-3">Category Filter</h3>
-      <div class="w-full">
-        <select
-          id="category-dropdown"
-          name="category"
-          class="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">All Categories</option>
-          <option value="Burger">Burger</option>
-          <option value="Pizza">Pizza</option>
-          <option value="Salad">Salad</option>
-          <option value="Drinks">Drinks</option>
-          <option value="Meal">Meal</option>
-        </select>
+      <div class="w-full flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        
+        <!-- Category Filter with Label -->
+        <div class="flex flex-col w-full sm:w-auto">
+          <label for="category-dropdown" class="mb-1 text-sm text-gray-600">Category</label>
+          <select
+            id="category-dropdown"
+            name="category"
+            class="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="">All Categories</option>
+            <option value="Burger">Burger</option>
+            <option value="Pizza">Pizza</option>
+            <option value="Salad">Salad</option>
+            <option value="Drinks">Drinks</option>
+            <option value="Meal">Meal</option>
+          </select>
+        </div>
+    
+        <!-- Search Input with Label -->
+        <div class="flex flex-col w-full sm:w-1/2">
+          <label for="search-input" class="mb-1 text-sm text-gray-600 text-right">Search</label>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search item..."
+            class="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
       </div>
-    </section>
+    </section> 
 
     <div class="flex flex-col md:flex-row gap-6">
       <!-- Product List -->

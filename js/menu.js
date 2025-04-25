@@ -1,11 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
     fetchMenuForHeaderData();
+    updateDashboardTitle(); // Update dashboard title based on device type
     menuItem();
 });
 
 window.addEventListener("resize", () => {
     const menuItems = JSON.parse(sessionStorage.getItem("menuItems")) || []; // Cache menu items
     const userRole = sessionStorage.getItem("userRole") || "Guest"; // Cache user role
+    updateDashboardTitle(); // Update dashboard title based on device type
     renderMenu(menuItems, userRole, 'menu-items');
     renderMenu(menuItems, userRole, 'mobile-menu-items');
 });
@@ -67,6 +69,20 @@ function renderMenu(menuItems, userRole, containerId) {
         container.classList.add('mobile-menu');
     } else {
         container.classList.remove('mobile-menu');
+    }
+}
+
+function updateDashboardTitle() {
+    const dashboardLink = document.getElementById("dashboard-link");
+    if (!dashboardLink) return;
+
+    if (isMobileDevice()) {
+        dashboardLink.innerHTML = '<i class="fa-brands fa-wolf-pack-battalion"></i>';
+        dashboardLink.classList.remove("text-2xl", "font-semibold");
+        dashboardLink.classList.add("text-xl");
+    } else {
+        dashboardLink.textContent = 'Dashboard';
+        dashboardLink.classList.add("text-2xl", "font-semibold");
     }
 }
 
@@ -205,5 +221,5 @@ function setMenuFormData(item) {
 
 // Utility function to check if the device is mobile
 function isMobileDevice() {
-    return window.innerWidth <= 768; // Adjust breakpoint as needed (e.g., 768px for tablets and below)
+    return window.innerWidth <= 1025; // Adjust breakpoint as needed (e.g., 768px for tablets and below)
 }
