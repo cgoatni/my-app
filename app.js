@@ -14,6 +14,8 @@ const { v2: cloudinary } = pkg;
 import { sendWelcomeEmail, sendContactFormEmail } from './js/emailer.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { parse } from 'url';
+import { basename } from 'path';
 
 // Handle __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -565,12 +567,19 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
     }
 
     try {
+        // Extract the file name and extension
+        const fileName = path.parse(req.file.originalname).name; // Get the file name without extension
+        const fileExtension = path.parse(req.file.originalname).ext; // Get the file extension
+
+        // Build the public ID for Cloudinary
+        const publicId = `${Date.now()}-${fileName}`;
+
         // Upload image to Cloudinary using upload_stream
         const result = await new Promise((resolve, reject) => {
             const stream = cloudinary.uploader.upload_stream(
                 {
                     folder: 'products',
-                    public_id: `${Date.now()}-${req.file.originalname}`,
+                    public_id: publicId, // Use sanitized public ID
                     timeout: 60000, // Set timeout to 60 seconds
                 },
                 (error, result) => {
@@ -583,15 +592,14 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
 
         // Insert product into the database
         const imageUrl = result.secure_url;
-
-        console.log("Image URL:", imageUrl); // Log the image URL for debugging
+        
         const dbResult = await db.collection('products').insertOne({
             name,
             description,
-            price: parseInt(price),
+            price: parseFloat(price), // Ensure price is stored as a float
             image: imageUrl,
             category,
-            quantity: parseInt(quantity),
+            quantity: parseInt(quantity), // Ensure quantity is stored as an integer
         });
 
         res.status(201).json({
@@ -600,7 +608,7 @@ app.post('/add/product', upload.single('image'), async (req, res) => {
             imageUrl,
         });
     } catch (error) {
-        console.error('Error inserting product:', error);
+        console.error('❌ Error inserting product:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -645,12 +653,31 @@ app.delete('/delete/product/:id', async (req, res) => {
     const productId = req.params.id;
 
     try {
+        // Find the product by ID
         const product = await db.collection('products').findOne({ _id: new ObjectId(productId) });
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
 
+        // Delete the product's image from Cloudinary if it exists
+        if (product.image) {
+            try {
+                // Extract the public ID from the image URL
+                const imageUrl = product.image;
+                const publicId = imageUrl
+                    .split('/')
+                    .slice(-2)
+                    .join('/')
+                    .replace(/\.[^/.]+$/, ''); // Remove the file extension
+
+                await cloudinary.uploader.destroy(publicId);
+            } catch (cloudinaryError) {
+                console.error('❌ Error deleting image from Cloudinary:', cloudinaryError);
+            }
+        }
+
+        // Delete the product from the database
         const result = await db.collection('products').deleteOne({ _id: new ObjectId(productId) });
 
         if (result.deletedCount > 0) {
