@@ -147,6 +147,7 @@ function createProductCard(product) {
         // Set Delete icon
         actionButton.innerHTML = ''; // Clear previous content
         actionButton.appendChild(deleteIcon);
+        actionButton.classList.add("hidden"); // Add hover effect
 
         // Delete Button Event Listener
         actionButton.addEventListener("click", (event) => {
